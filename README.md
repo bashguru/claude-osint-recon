@@ -1,184 +1,265 @@
 # claude-osint-recon
 
-A Claude plugin for **OSINT investigations**. Give Claude a **username or an email
-address** and it finds where that identity exists across hundreds of public
-websites, **confirms the real accounts in a browser, screenshots them, and builds a
-court-ready evidence report**, all from plain-language requests, no coding required.
-It can also check whether an identity appears in known infostealer-malware leaks.
+A Claude plugin for **OSINT investigations** that anyone can run by typing in plain
+English, no coding required. Give Claude a **username** or an **email address** and
+it finds where that identity exists across hundreds of public websites, confirms the
+real accounts in a web browser, takes a screenshot of each one, and assembles
+everything into a single, court-ready evidence report. It can also check, with your
+permission, whether an identity shows up in known infostealer-malware leaks.
 
-The plugin lives in the [`username-recon/`](username-recon/) folder. This page is the
-quick-start; the full details are in [`username-recon/README.md`](username-recon/README.md).
+The plugin itself lives in the [`username-recon/`](username-recon/) folder. This page
+is the friendly guide. A shorter technical overview is in
+[`username-recon/README.md`](username-recon/README.md).
 
-> **Use it lawfully.** Public pages only. It never logs in, never submits a
-> password, and never bypasses security or "are you human" checks. Use it for your
-> own digital footprint, consented investigations, security research, or
-> brand/impersonation monitoring, never to stalk, harass, or locate someone. A match
-> is a *lead*, not proof of identity.
-
----
-
-## What you get
-
-1. **Find by username.** Checks a handle against ~481 public sites and returns the
-   likely accounts.
-2. **Find by email.** Checks whether an email is registered across ~98 sites, using
-   their public signup, validation, or login-check endpoints. Sites that could email
-   the person ("loud") and adult sites are flagged and off by default.
-3. **Verify and screenshot.** Opens each likely hit in a real browser so results
-   match what a human sees, and captures a screenshot of every confirmed profile.
-4. **Report.** Bundles everything into one self-contained HTML evidence report:
-   embedded screenshots, full links, timestamps, and a tamper-check code (SHA-256)
-   per image.
-5. **Optional extras.** Run a **combined** investigation (username and email in one
-   pass), and optionally check an identity against **infostealer-malware logs**
-   (Hudson Rock, a third-party service, only with your go-ahead).
+> **Use it lawfully.** This tool only looks at pages and signals that are already
+> public. It never logs into anyone's account, never uses a real password, and never
+> defeats a security or "are you human" check. Use it for your own digital footprint,
+> investigations you are authorized to run, security research, or
+> brand and impersonation monitoring. Do not use it to stalk, harass, or physically
+> locate a person. A match is a **lead, not proof of identity**: the same handle or
+> email can belong to different people, or be reused, recycled, or shared.
 
 ---
 
-## The one thing to understand first: the search runs on *your* computer
+## What it does, in plain terms
+
+1. **Find accounts by username.** Checks a handle (for example `johndoe`) against
+   roughly **481 public sites** and returns the ones that look like real accounts.
+2. **Find accounts by email.** Checks an email address against roughly **98 sites**
+   using their public "is this email already registered" signals. Sites that might
+   email the person, and adult sites, are turned off unless you opt in.
+3. **Confirm and screenshot.** Opens each likely hit in a real browser so the result
+   matches what a human would see, and captures a screenshot of every confirmed page.
+4. **Report.** Bundles the findings into one self-contained HTML file with the
+   screenshots, the links, the timestamps, and a tamper-check code for each image.
+5. **Optional extras.** Investigate a username and an email together in one pass, and
+   optionally check an identity against infostealer-malware leak data (a third-party
+   service, only when you say yes).
+
+---
+
+## What it actually checks, and what the answers mean
+
+For a **username**, it asks each site the simple question "does a public profile
+exist at this address?" (for example `github.com/johndoe`). For an **email**, it
+asks each site's public signup or sign-in page "is this email already in use here?"
+It never tries to log in.
+
+Each site comes back with one of these answers:
+
+| Answer | Meaning |
+| --- | --- |
+| **found** / **registered** | An account appears to exist. This is a lead worth confirming and documenting. |
+| **not found** / **not registered** | No account was detected there. |
+| **unknown** (shown as `waf`) | A site blocked or challenged the check, so the answer could not be trusted. It is not a "no." A real browser often gets through. |
+| **error** | A network or timeout problem. Worth retrying. |
+| **illegal / skipped** | The username or email cannot be valid on that site (so it was skipped), or the site was skipped because it could notify the person (see "loud" below). |
+
+The sites span many categories: social networks, developer and code platforms,
+forums and communities, gaming, creators, shopping, music, news, and more. The
+username list comes from the well-known open-source Sherlock project; the email list
+was adapted from the open-source user-scanner project.
+
+---
+
+## The most important setup fact: the search runs on *your* computer
 
 Claude has its own cloud workspace, but that workspace is **blocked from opening
-these websites** (it has no open internet access for the site checks). So the actual
-checking has to run on **your** computer, using **your** internet connection. This is
-not an extra feature, it is how the tool reaches the sites at all, and it also means
-your real connection is far less likely to be blocked than a shared cloud one.
+these websites**. It has no open internet access for the site checks. So the actual
+checking has to run on **your** computer, over **your** internet connection. This is
+not an optional nicety, it is how the tool reaches the sites at all. A nice side
+effect is that your real connection is far less likely to be blocked than a shared
+cloud one.
 
-In practice that means one of these does the searching for you:
+In practice, one of these does the searching for you:
 
-- **Desktop Commander** (recommended): Claude runs the search on your computer
-  automatically, or
-- **your Terminal**: Claude hands you a single command to paste, and you paste the
+- **Desktop Commander** (recommended): Claude runs the search on your machine for you.
+- **Your Terminal**: Claude hands you a single command to paste, and you paste the
   result back.
 
-Either way it takes seconds. The setup below walks you through it.
+Either way it takes seconds. If you skip this step, Claude can only try from its
+blocked cloud workspace and will find almost nothing. That is expected, not a bug.
 
 ---
 
-## Before you start (what you need)
+## What you need
 
-You do not have to set these up by hand. The easiest path is to **install the
-plugin, then ask Claude *"set up the tools"***. It checks each item below and walks
-you through anything missing, one step at a time.
+You do not have to set these up by hand. The easy path is to install the plugin and
+then ask Claude **"set up the tools"**. It checks each item and walks you through
+anything missing, one step at a time.
 
 | What | Why it is needed | Required? |
 | --- | --- | --- |
 | **Claude with plugin support** (Cowork or Claude Code) | Runs the plugin | Required |
-| **A browser connection** (Browser MCP extension *or* Playwright) | Confirms accounts and captures the screenshot evidence | Required for evidence |
-| **A way to run the search on your own internet** (Desktop Commander *or* your Terminal) | This is what actually reaches the sites (see the note above) | Required for real results |
-| **Python 3.8 or newer** | Powers the search engine and report builder (nothing extra to install) | Required, usually already on your Mac/Linux |
+| **A browser connection** (Browser MCP extension *or* Playwright) | Confirms accounts and captures the screenshots | Required to capture evidence |
+| **A way to run the search on your own internet** (Desktop Commander *or* your Terminal) | Actually reaches the sites (see the note above) | Required for real results |
+| **Python 3.8 or newer** | Runs the search engine and report builder (nothing extra to install) | Required, usually already on Mac/Linux |
 
 ---
 
-## Step 1. Install the plugin
+## Setup, step by step
 
-**In Cowork (easiest):**
+### Step 1. Install the plugin
 
-1. Download or open the plugin file [`username-recon.plugin`](username-recon.plugin).
-2. Claude shows a **Save plugin / Install** button. Click it.
-3. That is it. You can also manage it under **Settings → Capabilities**.
+**In Cowork (easiest):** open the [`username-recon.plugin`](username-recon.plugin)
+file in Claude and click **Save plugin / Install**. You can also manage it under
+**Settings → Capabilities**.
 
-**In Claude Code:** add the `username-recon/` folder as a plugin, then talk to it the
-same way.
+**In Claude Code:** add the `username-recon/` folder as a plugin.
 
-After installing, just say **"set up the tools"** and let Claude check the rest.
+Then just say **"set up the tools"** and let Claude check the rest.
 
----
+### Step 2. A browser connection (captures the evidence)
 
-## Step 2. Set up the prerequisites (plain-language walkthrough)
+You only need **one**:
 
-Set these up in any order; Claude re-checks after each. If you would rather just be
-guided, say *"set up the tools"* and Claude does this with you, one step at a time.
+- **Browser MCP extension (recommended).** Lets Claude use *your* Chrome or Edge.
+  Install from **https://browsermcp.io/install**, enable it in
+  **Settings → Capabilities** (technical name `@browsermcp/mcp`), click the toolbar
+  icon and press **Connect**, and leave that window open.
+- **Playwright (fallback).** A self-contained browser Claude runs itself. Added in
+  **Settings → Capabilities** (`@playwright/mcp`, needs Node.js 18+). Run it visible
+  so you can solve any human-checks.
 
-### 2a. A browser connection (this is what captures evidence)
+### Step 3. A way to run on your own internet (reaches the sites)
 
-You only need **one** of these.
+- **Desktop Commander (recommended).** Enable it in **Settings → Capabilities**
+  (`@wonderwhy-er/desktop-commander`) and approve access. This gives Claude terminal
+  access to your computer; you stay in control and approve each action.
+- **Your Terminal.** Prefer not to connect anything? Claude gives you one command to
+  paste and you paste the result back.
 
-- **Browser MCP extension (recommended).** A small extension that lets Claude use
-  *your* Chrome or Edge, with your normal logins. Fewer "are you human" checks, and
-  screenshots come back cleanly.
-  1. Install it from **https://browsermcp.io/install**.
-  2. Turn on its connector in **Claude → Settings → Capabilities** (technical name
-     `@browsermcp/mcp`).
-  3. Click the **Browser MCP** toolbar icon and press **Connect** (it does nothing
-     until you click Connect).
-  4. Leave that browser window open.
-  - *Working when* Claude says *"Browser ready (Browser MCP extension)."*
+### Step 4. Python 3.8+ (usually already there)
 
-- **Playwright (fallback).** A self-contained browser Claude runs on its own. Add it
-  in **Settings → Capabilities** (package `@playwright/mcp`; needs Node.js 18+). Run
-  it *visible* so you can solve any human-checks. See
-  https://github.com/microsoft/playwright-mcp
-
-### 2b. A way to run the search on your own internet (this is what reaches the sites)
-
-As explained above, the checking must run on your computer. Pick one:
-
-- **Desktop Commander (recommended).** Lets Claude run the search on your computer
-  for you, finishing in seconds. Enable **Desktop Commander** in **Settings →
-  Capabilities** (package `@wonderwhy-er/desktop-commander`) and approve access when
-  asked.
-  *This gives Claude terminal access to your computer. Only enable it if you are
-  comfortable with that; you stay in control and approve each action.*
-- **Your Terminal (no extra tools).** Prefer not to connect anything? Claude hands
-  you **one command** to paste into Terminal, then you paste the result back. Same
-  outcome, you just run the one line yourself.
-
-> If you skip this step, Claude can only try the search from its own cloud
-> workspace, which is blocked from the internet and will find almost nothing. That
-> is expected, it is not the tool failing. Connect Desktop Commander or run the one
-> command locally and it works normally.
-
-### 2c. Python 3.8+ (likely already installed)
-
-The engine and report builder are plain Python with **nothing to `pip install`**.
-
-- **Check it.** Open Terminal and run `python3 --version`; you want **3.8 or newer**.
-- **Mac.** Usually already there. If not, see https://www.python.org/downloads/ or
-  `brew install python`.
-- **Linux.** Run `sudo apt install python3` (or your distro's equivalent).
+Check with `python3 --version` in a terminal. On Mac it is usually preinstalled; if
+not, install from https://www.python.org/downloads/ or with `brew install python`.
+On Linux use your package manager. There is nothing to `pip install`.
 
 ---
 
-## Step 3. Use it
+## The skills, and how to ask for each
 
-Just ask Claude in plain language. For example:
+A "skill" is just a capability the plugin knows how to do. You never call them by
+name; you ask in plain language and Claude picks the right one. There are seven.
 
-- *"Find the username `johndoe` and capture evidence."*
-- *"Where is the email `someone@example.com` registered?"*
-- *"Run a full recon on this username and email."* (combined)
-- *"Has this email shown up in any malware leaks?"* (infostealer, asks you first)
-- *"Build me the OSINT report."*
-- *"Does the GitHub detection still look right?"* (self-check)
-- *"Can we add this site to the list?"*
+| Skill | What it is for | Say something like |
+| --- | --- | --- |
+| **preflight** | Checks and helps set up the prerequisites. Runs first, automatically. | *"set up the tools"*, *"is everything ready?"* |
+| **username-search** | Finds where a username has accounts and confirms the real ones. | *"find the username johndoe"*, *"what accounts does this handle have?"* |
+| **email-search** | Finds where an email is registered. | *"where is jane@example.com registered?"* |
+| **recon** | Runs username and email together, plus an optional leak check, into one report. | *"run a full recon on this username and email"* |
+| **evidence-report** | Captures the screenshots and builds the court-ready HTML report. | *"build me the evidence report"*, *"I'd like the output now"* |
+| **site-healing** | Checks that detection for a site is still accurate, and fixes it if a site changed. | *"does the GitHub detection still look right?"*, *"this result looks wrong"* |
+| **add-site** | Teaches the tool a brand-new site to check. | *"can we add this site to the list?"* |
 
-Claude runs the prerequisite check, does the search on your machine, confirms the
-hits in the browser, screenshots them, and offers you a report.
+The optional **infostealer leak check** (Hudson Rock) is requested the same way:
+*"has this email shown up in any malware leaks?"* Claude shows a privacy notice and
+asks before sending anything to that third-party service.
 
-**At the end, ask for the output you want:**
+---
 
-- an **HTML evidence report** (the default, opens offline anywhere),
-- **CSV / JSON** of the findings, or
-- a **Word (.docx) or PDF** write-up.
+## Common use cases
 
-### A note on email checks
+- **Check your own footprint.** "Find my handle `janedoe` and show me everywhere it
+  has an account." Useful before a job search, or just to know what is public.
+- **Brand or impersonation monitoring.** "Search the username `acme-support` and flag
+  any accounts pretending to be us," then save the report as a record.
+- **A consented or authorized investigation.** With proper authorization, run a
+  combined recon on a subject's username and email and produce a documented,
+  timestamped evidence file.
+- **Security research.** Map the public footprint tied to an identifier, including an
+  optional check for whether it appears in infostealer leak data.
 
-Email checks read public "is this email already registered" signals on signup pages.
-Some sites would **email the person** if probed (a reset or finish-signup message).
-Those are treated as **loud** and are **skipped by default** so the subject is not
-tipped off; you can opt in if you have a lawful reason.
+In every case the deliverable is the same: confirmed accounts, with screenshots and a
+report you can keep.
 
-### A note on the infostealer check
+---
 
-The infostealer lookup sends the identifier to **Hudson Rock**, a third-party
-service that may log the query. Claude always **asks first** and shows a privacy
-notice before doing it. It is off unless you ask for it.
+## How a typical run goes
 
-### A note on "are you human" checks (CAPTCHAs)
+1. You ask, for example, *"find the username johndoe and capture evidence."*
+2. Claude runs **preflight** to confirm your browser and local execution are ready.
+3. It triages all the sites quickly **on your machine** and shows you the short list
+   of likely accounts.
+4. For each likely hit, it opens the page in your browser, confirms it is real, and
+   screenshots it. If a site shows a CAPTCHA, it pauses and asks you to solve it; it
+   never tries to bypass one.
+5. It offers you the report. You can also ask for other formats.
 
-Your browser stays visible so you can solve these yourself. Claude will **never** try
-to bypass them. It pauses, brings the window forward, and asks you to click through;
-once you confirm, it captures the evidence and continues. This keeps everything
-lawful and reliable.
+---
+
+## Reading the output, and where it is saved
+
+The default deliverable is **one HTML evidence report**. It opens offline in any
+browser and contains, for each confirmed finding: the screenshot (click to enlarge),
+the exact link, the date and time in UTC, how it was captured, and a **SHA-256
+tamper-check code** computed from the image. When you open it, the page re-checks
+those codes and shows "integrity verified," and it prints or exports to PDF cleanly.
+
+The report is also interactive: each finding has a "relevant, include in export"
+checkbox so you can keep the signal and drop the noise, then export just the subset
+as CSV or as a JSON case file (a "Copy for Claude" button lets you paste it back for
+a written summary).
+
+Files are saved into the project folder you are working in, under
+`evidence/<case-id>/` for the screenshots and `Evidence_<subject>.html` for the
+report. At the end of a run you can also ask for **CSV or JSON** of the findings, or a
+**Word (.docx) or PDF** write-up.
+
+---
+
+## Adding your own sites, and keeping checks accurate
+
+The site lists are not fixed. Two skills keep coverage growing and trustworthy, and
+both are designed so a non-expert can use them.
+
+**To add a site you care about**, say *"can we add example.com to the checks?"* The
+**add-site** skill will check whether the site even works for this (it needs a public
+per-user page, or a public "is this email registered" signal that is visible without
+logging in), then learn the difference between a real account and a missing one, write
+a detection rule, and verify it. For sites that need a throwaway test account as a
+reference, Claude asks you to create one and keeps it safely on your own machine,
+never in the plugin or any report.
+
+**To keep checks accurate over time**, say *"verify the sites"* or, if a result looks
+off, *"this GitHub result looks wrong."* Websites change how they respond, which can
+quietly cause false positives ("found everywhere") or false negatives ("missed a real
+account"). The **site-healing** skill tests a site with a known-existing and a
+known-missing identifier and repairs the rule when it has drifted. This is the
+"self-healing" half of the plugin, and it pairs well with a weekly scheduled check.
+
+---
+
+## Limitations and caveats (please read)
+
+- **A match is a lead, not proof.** Confirm before drawing conclusions, and do not
+  pair results with someone's home address or other locating data.
+- **"Unknown" is not "no."** A blocked or challenged site means the check could not be
+  trusted there, not that nothing exists.
+- **Email checks are newer and need confirming.** The email site rules were adapted
+  from another project and have not all been tested live, because the checks have to
+  run on your machine. Treat email results as provisional until confirmed, and use
+  site-healing to fix any that look wrong. A handful of sites are intentionally not
+  included because they cannot be checked safely without bespoke code.
+- **Coverage is a snapshot.** Sites come and go and change. Use add-site and
+  site-healing to keep the lists current.
+- **Some checks could be noticed.** A few email sites would email the person if
+  probed; these are labeled "loud" and are off unless you opt in. Adult sites are
+  off unless you opt in.
+
+---
+
+## Troubleshooting
+
+- **"It found almost nothing."** The search ran in Claude's blocked cloud workspace
+  instead of on your machine. Connect Desktop Commander, or run the one command in
+  your Terminal, and try again.
+- **"A site says it cannot verify."** That site challenged the check. Let Claude open
+  it in your browser, solve the human-check if one appears, and it will confirm.
+- **"The browser will not connect."** Click the Browser MCP toolbar icon and press
+  **Connect** again on a normal web page, and keep that window open.
+- **Anything unclear?** Just ask Claude *"set up the tools"* and it will re-check
+  everything and tell you what is missing in plain language.
 
 ---
 
@@ -186,26 +267,20 @@ lawful and reliable.
 
 | Path | What it is |
 | --- | --- |
-| [`username-recon/`](username-recon/) | The plugin itself (skills, engine, site lists, docs). |
-| [`username-recon/README.md`](username-recon/README.md) | Full overview and usage. |
-| [`username-recon/HANDOFF.md`](username-recon/HANDOFF.md) | Team handoff / quick reference. |
+| [`username-recon/`](username-recon/) | The plugin (skills, engine, site lists, docs). |
+| [`username-recon/README.md`](username-recon/README.md) | Technical overview. |
+| [`username-recon/HANDOFF.md`](username-recon/HANDOFF.md) | Quick reference for teammates. |
 | `username-recon.plugin` | The installable plugin bundle. |
-| `data.json` | The community-maintained username site list (snapshot). |
+| `data.json` | The username site list (snapshot). |
 | `NOTICE` | Attribution and licensing. |
-
-### The skills inside
-
-**preflight** (check/set up prerequisites), **username-search** (find accounts by
-handle), **email-search** (find accounts by email), **recon** (both at once, plus
-optional infostealer), **evidence-report** (capture + build the HTML report),
-**site-healing** (keep detection accurate), and **add-site** (teach it a new site).
 
 ---
 
-## License
+## License and attribution
 
 MIT. The username site list derives from the MIT-licensed
 [Sherlock](https://github.com/sherlock-project/sherlock) project; the email and
-infostealer tradecraft is informed by the MIT-licensed
-[user-scanner](https://github.com/kaifcodec/user-scanner) project. See
-[`username-recon/NOTICE`](username-recon/NOTICE) for attribution.
+infostealer detection is informed by the MIT-licensed
+[user-scanner](https://github.com/kaifcodec/user-scanner) project, and the leak check
+is powered by [Hudson Rock](https://www.hudsonrock.com). See
+[`username-recon/NOTICE`](username-recon/NOTICE) for details.
