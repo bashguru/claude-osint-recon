@@ -38,7 +38,7 @@ is standard, lawful OSINT.
 ## Step 0. Preflight (always)
 
 Before anything else, run the **preflight** skill to confirm prerequisites. You
-need a browser MCP (extension first, then Playwright), a way to run triage on the
+need the Playwright MCP (the required browser for verify + screenshots), a way to run triage on the
 analyst's machine (Desktop Commander or their terminal, since the sandbox is
 egress-limited), and Python 3.8+. It guides setup for anything missing. Tell the
 analyst what's ready, then start.
@@ -56,20 +56,18 @@ this answer.
 
 The Claude sandbox is the **last** resort, not the default. Prefer, in order:
 
-1. **Browser MCP, primary (do checking *and* evidence here).**
-   Use the **browser-mcp extension** first. It's the analyst's own browser, so bot
-   challenges are rarer, evidence matches what they see, screenshots come back
-   inline, and they keep control of their tabs. Fall back to **playwright-mcp**
-   only when the extension isn't connected. This is the only tier that produces
-   screenshot evidence.
+1. **Playwright MCP, primary (do checking *and* evidence here).**
+   Use **Playwright** (the required browser, driven with `mcp__playwright__*`). Run
+   it visible so the analyst can solve any bot challenge. This is the only tier that
+   produces screenshot evidence.
 2. **Local CLI, secondary (fast triage, if accessible).** Run the bundled
    `hunt.py` engine on the **analyst's own machine** (e.g. via a Desktop Commander
    MCP or their terminal). Same real IP as their browser, so far fewer firewall
    blocks than the sandbox. Use it to *triage* hundreds of sites quickly.
 3. **Claude sandbox, last resort.** Run `hunt.py` inside the sandbox only when
-   no browser MCP and no local CLI are available. Its IP is often flagged, so
-   expect more `waf`/blocked results. Never present sandbox results as final
-   evidence. Re-verify hits in the browser before reporting.
+   no local CLI is available. Its IP is often flagged, so expect more `waf`/blocked
+   results. Never present sandbox results as final evidence. Re-verify hits in
+   Playwright before reporting.
 
 ### Triage-first is the hard default (don't browser-search for breadth)
 
@@ -94,8 +92,7 @@ default.
 Only **confirmed triage hits** reach the browser. For each, one clean tab at a
 time:
 
-1. **Open** the profile URL (`mcp__browsermcp__browser_navigate` or
-   `mcp__playwright__browser_navigate`).
+1. **Open** the profile URL with `mcp__playwright__browser_navigate`.
 2. **Decide existence from the lightest signal first**, the final URL and page
    **title** (plus, only if needed, one targeted "not found" text check). **Do not
    read or parse the whole page / accessibility tree**, that is the main time and
@@ -104,11 +101,9 @@ time:
 3. **Screenshot only to capture evidence** for a confirmed hit (not to decide).
    Save to `evidence/<case-id>/<site>.png`; record the full URL, UTC time, tool,
    and title. (See the **evidence-report** skill for the metadata.)
-4. **Close / navigate the single tab onward** before the next hit. Never leave
-   tabs open or linger.
-   - Browser-mcp extension: reuse the one controlled tab and navigate it onward.
-   - Playwright (fallback): close the tab (`mcp__playwright__browser_tabs` /
-     `browser_close`).
+4. **Close the tab** before the next hit (`mcp__playwright__browser_tabs` /
+   `browser_close`). Never leave tabs open or linger; canonical state lives in the
+   case file, so a closed tab never loses progress.
 
 ## Bot protection (pick a policy, never auto-bypass)
 
@@ -118,7 +113,7 @@ analyst once at the start of a run** how challenges should be handled, then appl
 it consistently:
 
 - **Assisted (default for interactive runs).** When a challenge appears, surface
-  it in the analyst's own browser and **pause** for them to solve it; on their
+  it in the visible Playwright window and **pause** for them to solve it; on their
   confirmation, re-check and capture. **If they close the tab or skip**, record the
   finding as `waf` with the note "tab closed, not verified" and move on.
 - **Automated / unattended (default for scheduled runs).** Don't wait.
@@ -186,8 +181,8 @@ work, and which endpoint:
 - **SOCKS5:** not supported by the dependency-free stdlib engine out of the box.
   Run behind a VPN/system route, use a local HTTP→SOCKS bridge, or ask to enable
   optional `pysocks` support.
-- **Browser tier:** the browser-mcp extension follows the analyst's system/VPN and
-  browser proxy settings; Playwright can be launched with a proxy.
+- **Browser tier:** Playwright can be launched with a proxy and follows the
+  machine's VPN/system routing.
 
 Responsible use: proxies/VPNs are for legitimate attribution management and
 geo/rate-limit handling on **public** pages, not for evading bans to abuse a

@@ -26,8 +26,8 @@ engine stays trustworthy. This is the "self-healing" half of the plugin.
 available. Prefer the **analyst's own machine** (local CLI) over the **Claude
 sandbox** (a last resort, since its flagged IP causes spurious `waf_blocked` verdicts
 that look like broken sites). When you need to *eyeball* a profile to repair a
-rule, use the **browser MCP** (the browser-mcp extension first, playwright-mcp as
-the fallback). If a human-verification challenge appears, do not auto-bypass
+rule, use **Playwright** (the required browser; run it visible). If a
+human-verification challenge appears, do not auto-bypass
 it. Apply the run's bot policy (assisted = the analyst solves it; automated =
 screenshot the block as evidence and continue). See the username-search
 `tradecraft.md` for the full tier model.
@@ -84,7 +84,7 @@ username.
 
 ## Repair
 
-1. Open the suspect site in the **browser MCP** (preferred) or fetch it, then view a
+1. Open the suspect site in **Playwright** (preferred) or fetch it, then view a
    **known-existing** profile and a **random missing** one. Compare status codes
    and bodies. (If a bot challenge appears, hand off to the analyst and don't bypass.)
 2. Decide the correct detection method and edit the site's entry in

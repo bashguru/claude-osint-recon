@@ -32,8 +32,9 @@ and **preflight** (which confirms prerequisites are ready).
 
 ## Capture protocol (court-ready)
 
-Capture happens in the **browser MCP** (the browser-mcp extension first, Playwright
-as the fallback), and **only for confirmed triage hits**, not the whole catalog.
+Capture happens in **Playwright** (the required browser, driven with
+`mcp__playwright__*`, run visible), and **only for confirmed triage hits**, not the
+whole catalog.
 For **each** confirmed account, one clean tab at a time:
 
 1. **Navigate** to the profile URL.
@@ -44,13 +45,13 @@ For **each** confirmed account, one clean tab at a time:
 4. **Record** a finding entry (see the metadata schema in the reference): site,
    category, status, full URL, UTC capture time, method, page title, HTTP status
    if known, the screenshot path, and notes.
-5. **Close / navigate the tab onward** before the next site. Never linger or
+5. **Close the tab** (`browser_close`) before the next site. Never linger or
    accumulate tabs. If a tab was closed or drifted, re-navigate. Canonical state
    lives in the case file, so progress is never lost.
 
 On a **bot challenge**, never auto-bypass it. Apply the run's bot policy (set in
-**username-search**). Under **Assisted**, pause for the analyst to solve it in their own
-browser (if they close the tab, record `waf` + "tab closed, not verified"). Under
+**username-search**). Under **Assisted**, pause for the analyst to solve it in the
+visible Playwright window (if they close the tab, record `waf` + "tab closed, not verified"). Under
 **Automated**, screenshot the block page as evidence, record `waf` + "bot
 challenge blocked, could not verify", and continue. Full detail in
 `${CLAUDE_PLUGIN_ROOT}/skills/evidence-report/references/evidence-protocol.md`.

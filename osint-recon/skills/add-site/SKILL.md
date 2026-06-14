@@ -167,7 +167,7 @@ to tune the rule, then re-verify. Prefer running `verify` on the analyst's machi
 ## Bot challenges & page hygiene
 
 If a human-verification challenge appears, **never auto-bypass it**. Apply the
-run's bot policy (assisted = the analyst solves it in their own browser; automated
+run's bot policy (assisted = the analyst solves it in the visible Playwright window; automated
 = screenshot the block as evidence and continue). Work one page at a time and
 **close each tab after you've captured what you need**; if a tab is closed, just
 re-navigate (state isn't kept in the tab).

@@ -100,7 +100,7 @@ anything missing, one step at a time.
 | What | Why it is needed | Required? |
 | --- | --- | --- |
 | **Claude with plugin support** (Cowork or Claude Code) | Runs the plugin | Required |
-| **A browser connection** (Browser MCP extension *or* Playwright) | Confirms accounts and captures the screenshots | Required to capture evidence |
+| **Playwright MCP** (a self-contained browser Claude drives) | Confirms accounts and captures the screenshots | Required to capture evidence |
 | **A way to run the search on your own internet** (Desktop Commander *or* your Terminal) | Actually reaches the sites (see the note above) | Required for real results |
 | **Python 3.8 or newer** | Runs the search engine and report builder (nothing extra to install) | Required, usually already on Mac/Linux |
 
@@ -118,17 +118,15 @@ file in Claude and click **Save plugin / Install**. You can also manage it under
 
 Then just say **"set up the tools"** and let Claude check the rest.
 
-### Step 2. A browser connection (captures the evidence)
+### Step 2. Playwright (the browser that captures evidence)
 
-You only need **one**:
+This plugin uses **Playwright MCP**, a self-contained browser that Claude drives
+itself. It is required and is the only browser path (it has proven the most
+consistent for screenshots).
 
-- **Browser MCP extension (recommended).** Lets Claude use *your* Chrome or Edge.
-  Install from **https://browsermcp.io/install**, enable it in
-  **Settings → Capabilities** (technical name `@browsermcp/mcp`), click the toolbar
-  icon and press **Connect**, and leave that window open.
-- **Playwright (fallback).** A self-contained browser Claude runs itself. Added in
-  **Settings → Capabilities** (`@playwright/mcp`, needs Node.js 18+). Run it visible
-  so you can solve any human-checks.
+- Add **Playwright MCP** in **Settings → Capabilities** (technical name
+  `@playwright/mcp`, needs Node.js 18+).
+- Run it **visible** so you can watch the pages and solve any "are you human" check.
 
 ### Step 3. A way to run on your own internet (reaches the sites)
 
@@ -265,8 +263,8 @@ known-missing identifier and repairs the rule when it has drifted. This is the
   your Terminal, and try again.
 - **"A site says it cannot verify."** That site challenged the check. Let Claude open
   it in your browser, solve the human-check if one appears, and it will confirm.
-- **"The browser will not connect."** Click the Browser MCP toolbar icon and press
-  **Connect** again on a normal web page, and keep that window open.
+- **"The browser will not connect."** Make sure **Playwright MCP** is enabled in
+  Settings → Capabilities and running visible, then ask Claude to try again.
 - **Anything unclear?** Just ask Claude *"set up the tools"* and it will re-check
   everything and tell you what is missing in plain language.
 

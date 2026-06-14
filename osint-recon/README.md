@@ -19,9 +19,9 @@ ones).
    (`hunt.py`) to get the short list of likely accounts.
 2. **Triage by email** across public signup/validation endpoints to find where an
    email is registered (logged out, no password ever submitted).
-3. **Verify in a real browser** (via an MCP, the Browser MCP extension or
-   Playwright), so results reflect what a human actually sees, and **capture a
-   screenshot** of each confirmed profile.
+3. **Verify in a real browser** (Playwright MCP, the required browser), so results
+   reflect what a human actually sees, and **capture a screenshot** of each
+   confirmed profile.
 4. **Report.** Assemble the findings into a single, self-contained, court-ready
    **HTML evidence report** with embedded screenshots, full URLs, UTC capture times,
    and a SHA-256 hash per screenshot.
@@ -37,7 +37,7 @@ tiers).
 
 | Tier | Tool | Role |
 | --- | --- | --- |
-| 1 (primary) | **Browser MCP** (**browser-mcp extension** first, `playwright-mcp` as fallback) | Verify accounts and capture screenshot evidence. Only tier that produces evidence. |
+| 1 (primary) | **Playwright MCP** (required; run it visible) | Verify accounts and capture screenshot evidence. Only tier that produces evidence. |
 | 2 (secondary) | **Local CLI** (`hunt.py` on the analyst's machine) | Fast bulk triage with the analyst's real IP (far fewer firewall blocks). |
 | 3 (last resort) | **Claude sandbox** (`hunt.py` in-sandbox) | Triage only when no browser/local CLI is available; flagged IP means more blocks. |
 
@@ -52,7 +52,7 @@ capture; closing a tab never loses progress (state lives in the case file).
 
 | Component | Purpose |
 | --- | --- |
-| Skill: **preflight** | Check all prerequisites (browser MCP, local execution for triage, Python) and walk a non-technical analyst through setting up anything missing. Runs first. |
+| Skill: **preflight** | Check all prerequisites (Playwright, local execution for triage, Python) and walk a non-technical analyst through setting up anything missing. Runs first. |
 | Skill: **username-search** | Triage by username, browser-verify, capture evidence, choose output, interpret results. |
 | Skill: **email-search** | Triage by email against public signup/validation endpoints (logged out); same verify + evidence flow. Loud (notifying) sites skipped by default. |
 | Skill: **recon** | Combined investigation: runs username-search and email-search together, cross-references them, optional infostealer, one report. Orchestration only. |
@@ -67,11 +67,10 @@ capture; closing a tab never loses progress (state lives in the case file).
 
 ## Setup / prerequisites
 
-- **A browser tool (required for verification + evidence).** Either:
-  - **Browser MCP extension** (recommended) drives the analyst's own Chrome/Edge;
-    fewer bot challenges, screenshots return inline, and they keep control of their
-    tabs. Install from <https://browsermcp.io/install> and click **Connect**; or
-  - **Playwright MCP**, a self-contained automated browser, as a fallback.
+- **Playwright MCP (required for verification + evidence).** A self-contained
+  automated browser Claude drives itself, and the only browser path. Add it in
+  **Settings → Capabilities** (`@playwright/mcp`, needs Node.js 18+) and run it
+  visible so you can solve any human-check.
 
   Not sure if it's set up? Just ask Claude *"set up the tools"*. The **preflight**
   skill checks every prerequisite and walks you through it. See

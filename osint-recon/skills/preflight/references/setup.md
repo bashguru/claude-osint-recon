@@ -8,7 +8,7 @@ time, and check that each worked.
 
 | Capability | Why | Easiest option |
 | --- | --- | --- |
-| **Browser MCP** | Verify accounts and capture **screenshot evidence** | Browser MCP **extension** (your own browser) |
+| **Playwright MCP** | Verify accounts and capture **screenshot evidence** | **Playwright MCP** (run it visible) |
 | **Local execution** | Run the **triage** engine fast on your real connection | **Desktop Commander** (Claude drives it) or your **Terminal** |
 | **Python 3.8+** | Runs the engine + report builder (no extra libraries) | Usually already installed on Mac/Linux |
 
@@ -16,33 +16,20 @@ You can set these up in any order. Claude re-checks after each.
 
 ---
 
-## 1. Browser MCP
+## 1. Playwright MCP (required)
 
-You only need **one** of these connected.
+This plugin uses **Playwright** as its browser for confirming accounts and taking
+screenshots. It is a self-contained browser that Claude drives itself, and it is the
+only browser path, so set it up before capturing evidence.
 
-### Option A. Browser MCP extension (recommended)
+1. In **Claude's settings → Connectors / Capabilities**, add **Playwright MCP**.
+   Technical detail: the official Microsoft package **`@playwright/mcp`**
+   (`npx @playwright/mcp@latest`), which needs **Node.js 18+**.
+2. Run it **headed (visible)** so you can watch the pages and solve any
+   "are you human" check.
 
-A small extension that lets Claude drive **your** Chrome/Edge, your real browser,
-with your logins. Sites challenge it less, screenshots come back cleanly, and you
-keep control of your tabs.
-
-1. Go to **https://browsermcp.io/install** and add the extension to Chrome/Edge.
-2. Make sure the matching connector is enabled in **Claude's settings → Connectors
-   / Capabilities** (technical name `@browsermcp/mcp`).
-3. Click the **Browser MCP** toolbar icon and press **Connect** (people forget this;
-   it does nothing until you connect the tab).
-4. Leave that window open.
-
-*Worked when:* Claude says *"Browser ready (Browser MCP extension)."* If it says
-"not connected," click the icon and **Connect** again on a normal web page.
-
-### Option B. Playwright (fallback, self-contained browser)
-
-A browser Claude runs by itself. Use it if you can't install the extension. It's
-added in **Claude's settings → Connectors / Capabilities**; the technical detail:
-official Microsoft package **`@playwright/mcp`** (`npx @playwright/mcp@latest`),
-needs **Node.js 18+**, and should run **headed (visible)** so you can solve any
-human-check. Official page: https://github.com/microsoft/playwright-mcp
+*Worked when:* Claude says *"Playwright ready."* Official page:
+https://github.com/microsoft/playwright-mcp
 
 ---
 
@@ -97,7 +84,7 @@ The engine and report builder are plain Python (**no `pip install` needed**).
 
 ## A note on human-checks (CAPTCHAs / "are you human")
 
-Whichever browser you use, it must be **visible** so you can solve these. Claude
+Run Playwright **visible** so you can solve these. Claude
 will **not** try to bypass them. By default it pauses, brings the window to the
 front, and asks you to click through; once you confirm, it captures the evidence
 and moves on. (For an unattended run you can instead have it just screenshot the
@@ -105,6 +92,5 @@ block as evidence and continue.) This keeps the work lawful and reliable.
 
 ## Sources
 
-- Browser MCP. https://browsermcp.io/install
 - Playwright MCP. https://github.com/microsoft/playwright-mcp
 - Desktop Commander. https://github.com/wonderwhy-er/DesktopCommanderMCP

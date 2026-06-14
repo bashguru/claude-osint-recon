@@ -9,10 +9,9 @@ consented investigations, security research, brand/impersonation monitoring.
 
 ## How it runs (execution tiers, sandbox is the last resort)
 
-1. **Browser MCP (primary).** A real browser does the verification and evidence.
-   The **Browser MCP extension** comes first (the analyst's own browser, with fewer
-   challenges, inline screenshots, and they keep their tabs), `playwright-mcp` as the
-   fallback. Only tier that produces screenshots.
+1. **Playwright MCP (primary).** A real browser does the verification and evidence.
+   **Playwright** is the required and only browser path; run it visible so the
+   analyst can solve any challenge. Only tier that produces screenshots.
 2. **Local CLI (secondary).** `hunt.py` on the analyst's own machine for fast bulk
    triage (real IP → fewer blocks).
 3. **Claude sandbox (last resort).** `hunt.py` in-sandbox only when nothing else is
@@ -26,7 +25,7 @@ the confirmed hits, one clean tab at a time. Closing a tab never loses progress
 
 ## Seven skills inside
 
-- **preflight** checks all prerequisites (browser MCP, local execution for
+- **preflight** checks all prerequisites (Playwright, local execution for
   triage, Python) and helps a non-technical analyst set up anything missing. Runs
   first.
 - **username-search** runs triage → browser-verify → capture evidence → interpret.

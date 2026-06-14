@@ -31,33 +31,22 @@ bytes, and the report stays portable. If a browser tool returns a screenshot
 inline instead of writing a file, save those bytes to the path above before
 building.
 
-## Capturing in the browser (per tool)
+## Capturing in the browser (Playwright)
 
-Capture one page at a time, **only for confirmed triage hits**, with this flow: **navigate →
-confirm (from final URL + title; don't parse the whole DOM) → screenshot → record
-→ close.** If a tab is closed or drifts, re-navigate. Canonical state lives in the
-case file, so a closed tab never loses progress.
+Capture one page at a time, **only for confirmed triage hits**, with this flow:
+**navigate → confirm (from final URL + title; don't parse the whole DOM) →
+screenshot → record → close.** If a tab is closed or drifts, re-navigate. Canonical
+state lives in the case file, so a closed tab never loses progress.
 
-### Browser MCP extension (`mcp__browsermcp__*`) (primary)
-
-- `browser_navigate` → the profile URL.
-- `browser_snapshot` to confirm the profile exists (correct username; not a "not
-  found" page); `browser_screenshot` to capture, then save the returned image to
-  `evidence/<case-id>/<site>.png`.
-- The extension drives the analyst's own browser and has no close tool, so **reuse
-  the single controlled tab** by navigating it onward to the next URL rather than
-  opening more. The analyst keeps their other tabs and closes this one when done.
-
-### Playwright (`mcp__playwright__*`) (fallback)
+Playwright (`mcp__playwright__*`) is the required browser, run it visible:
 
 - `browser_navigate` → the profile URL.
-- `browser_wait_for` → let it settle; then `browser_snapshot` to confirm the
-  profile exists.
-- `browser_take_screenshot` → full page. **Note:** Playwright saves into its own
-  output directory, which may be a different machine/sandbox than the report
-  generator, so make sure the file ends up in `evidence/<case-id>/` where
-  `build_report.py` can read it. (This split is exactly why the extension is
-  preferred.)
+- `browser_wait_for` → let it settle; then `browser_snapshot` to confirm the profile
+  exists (correct username; not a "not found" page).
+- `browser_take_screenshot` → full page. **Important:** Playwright writes to its own
+  output directory, which may differ from where the report is built, so make sure the
+  PNG ends up at `evidence/<case-id>/<site>.png` where `build_report.py` can read it
+  (move or copy the file there if needed).
 - `browser_tabs` (close) or `browser_close` → **close the tab before the next
   site.** Do not accumulate tabs.
 
@@ -67,7 +56,7 @@ Never programmatically solve or bypass a challenge (Cloudflare interstitial, "Pr
 & Hold", hCaptcha/reCAPTCHA, "verify you are human"). Apply the run's bot policy
 (chosen in **username-search**):
 
-- **Assisted.** Surface the challenge in the analyst's own browser and **pause**;
+- **Assisted.** Surface the challenge in the visible Playwright window and **pause**;
   on their confirmation, re-check and capture. If they **close the tab or skip**,
   record the finding as `waf` with note "tab closed, not verified" and move on.
 - **Automated / unattended.** Don't wait. **Screenshot the challenge page itself**
@@ -144,7 +133,7 @@ A JSON object with a `case` header and a `findings` array.
 | `status` | optional | `found` (default), `not_found`, `waf`, `error`. Anything else renders as "review". |
 | `category` | optional | `social`, `dev`, `gaming`, `forum`, `professional`, `media`, `commerce`, `crypto`, `other` (default). Drives the filter chips. |
 | `captured_url` | optional | The exact URL navigated to, if it differs from `profile_url`. |
-| `method` | optional | `browser-mcp` (extension) / `playwright-mcp` / etc. |
+| `method` | optional | How it was captured, e.g. `playwright-mcp`. |
 | `page_title` | optional | The page `<title>` at capture. |
 | `http_status` | optional | HTTP status code, if known. |
 | `notes` | optional | What the screenshot shows; observations. |

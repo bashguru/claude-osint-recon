@@ -90,10 +90,10 @@ login page).
 `hunt.py` is a fast **triage** engine, not the final word. Run work on the highest
 tier available; the Claude sandbox is the last resort, not the default.
 
-1. **Browser MCP, primary.** A real browser (the browser-mcp extension first,
-   playwright-mcp as the fallback) renders the page like a human sees it and is the
-   only tier that produces **screenshot evidence**. Use it to confirm and document
-   every `found` hit.
+1. **Playwright MCP, primary.** A real browser (Playwright, the required browser)
+   renders the page like a human sees it and is the only tier that produces
+   **screenshot evidence**. Run it visible to confirm and document every `found`
+   hit and to solve any human-check.
 2. **Local CLI, secondary.** Run `hunt.py` on the analyst's own machine (e.g. via
    a Desktop Commander MCP or their terminal). Same real IP as their browser, so
    far fewer firewall blocks than the sandbox. Best for fast bulk triage.
@@ -110,9 +110,8 @@ DOM), and screenshot for evidence. Never hand-browse the catalog for breadth.
 
 In the browser, work **one page at a time**: open → confirm → screenshot → record
 metadata → **close the tab** → next. Never leave a captured page lingering or let
-tabs accumulate. With the browser-mcp extension, reuse the single controlled tab
-and navigate it onward; with the Playwright fallback, close the tab
-(`browser_tabs`/`browser_close`).
+tabs accumulate. Close the tab (`browser_tabs`/`browser_close`) before the next
+page; canonical state lives in the case file, so a closed tab never loses progress.
 
 ## Bot detection & challenges
 

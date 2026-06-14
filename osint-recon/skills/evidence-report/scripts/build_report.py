@@ -759,7 +759,7 @@ def write_template(path, args):
                 "profile_url": "https://github.com/" + (args.subject or "username"),
                 "captured_url": "https://github.com/" + (args.subject or "username"),
                 "captured_at": now_utc_iso(),
-                "method": "browser-mcp",
+                "method": "playwright-mcp",
                 "page_title": "",
                 "http_status": 200,
                 "screenshot": "evidence/github.png",
