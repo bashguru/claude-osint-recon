@@ -20,32 +20,57 @@ missing one. This is the cheapest signal, since a `HEAD` request is enough, so w
 download the page body. ~⅔ of real-world sites work this way.
 
 - Found  → status is 2xx.
-- Not found → status ≥ 300 or < 200, **or** the status is in the site's
-  `errorCode` list (some sites answer `200` with a "not found" page but use a
-  specific code like `404`/`410` to mark absence).
+- Not found → status is in the site's `errorCode` list (some sites answer `200`
+  with a "not found" page but use a specific code like `404`/`410`), or status is
+  a non-2xx that is not "ambiguous" (see next).
+- Unknown (`waf`) → an **ambiguous** status of `401`, `403`, `406`, `429`, or `503`.
+  These usually mean "blocked or throttled," not "no account," so we report `waf`
+  (could not verify) instead of a misleading `not_found`. If a site legitimately
+  uses one of these codes to mark absence, list it explicitly in `errorCode` and
+  it is treated as not-found again.
 
 ### 2. `message`
-The site returns `200` either way, but the body of a missing profile contains a
-tell-tale string ("Page Not Found", "user does not exist", a specific `<title>`).
-This needs a `GET` (we must read the body).
+The site returns `200` either way, but the body distinguishes a real profile from
+a missing one. This needs a `GET` (we must read the body). Two complementary
+fields, either or both:
 
-- Not found → the `errorMsg` string (or any string in the `errorMsg` list) is
-  present in the body.
-- Found → none of those strings are present.
-
-Note the inverted logic. We look for the **absence** of the "not found" message.
+- `errorMsg` (negative marker). Not found → the `errorMsg` string (or any string
+  in the list) is **present** in the body. Found → none are present. The classic
+  inverted logic: look for the **absence** of the "not found" message.
+- `existsMsg` (positive marker, optional). Found → the `existsMsg` string (or any
+  in the list) is **present**. This is stronger for sites that return `200` for
+  every URL but only embed the real handle on a real profile (for example a
+  `<meta>` tag echoing the username). `{}` in a marker is interpolated with the
+  username, so `"profile:username\" content=\"{}\""` checks for that exact handle.
+  When both fields are set, a present `errorMsg` still wins and forces not-found.
 
 ### 3. `response_url`
 The site redirects a missing profile somewhere else (e.g. to the homepage or a
-login page). We **disable redirect following** so we can see the original status.
+login page).
 
-- Found → status is 2xx (the profile page loaded directly).
-- Not found → anything else (a 3xx redirect, etc.).
+- With `errorUrl` (preferred): we **follow redirects** and compare the final URL
+  to the interpolated `errorUrl`. Found → final URL differs and status is 2xx.
+  Not found → final URL matches `errorUrl` (the "missing user" destination). This
+  uses the `errorUrl` value the community manifest already ships.
+- Without `errorUrl` (fallback): we **disable redirect following** and treat a 2xx
+  as found, anything else as not-found (the original behavior, kept for entries
+  that have no `errorUrl`).
 
 ## Why the supporting machinery exists
 
-- **User-Agent spoofing.** Many sites serve bot-detection junk to default
-  clients. We send a real Firefox UA so we get the same page a human would.
+- **Browser-like requests.** Many sites serve bot-detection junk (or stale
+  markup) to bare clients. We send a current Chrome User-Agent plus the headers a
+  real browser sends (`Accept`, `Accept-Language`, `Accept-Encoding`,
+  `Sec-Fetch-*`), so we get the same page a human would. `--rotate-ua` spreads
+  requests across a small pool of modern agents; a site's own `headers` still win.
+- **Retries on transient errors.** A timeout or connection reset is retried a
+  couple of times (`--retries`, default 1) before we call it `error`. A real HTTP
+  response (any status) is never retried. This cuts spurious `error` verdicts in
+  both search and `verify`.
+- **Politeness / rate control.** `--delay` pauses before each request, and
+  `--proxy-file` rotates round-robin across many proxies (optionally validated
+  first with `--validate-proxies`), for attribution management and to avoid
+  tripping rate limits on public pages.
 - **`regexCheck` pre-filter.** Each site has username rules (length, allowed
   characters). If the target username can't be valid there, we skip the request
   entirely. That's faster, and avoids false hits on sites that "helpfully" 200 every
@@ -114,8 +139,10 @@ The manifest is a JSON object: `{ "Site Name": { ...fields... }, ... }`. Fields:
 | `url`             | yes      | Profile URL with `{}` where the username goes. Shown to the user. |
 | `urlMain`         | yes      | Site homepage (for reference/reporting). |
 | `errorType`       | yes      | `"status_code"`, `"message"`, or `"response_url"` (or a list combining them). |
-| `errorMsg`        | for `message` | String or list of strings that appear when a profile is missing. |
-| `errorCode`       | optional (`status_code`) | Int or list of status codes that mean "not found" even if 200-ish. |
+| `errorMsg`        | for `message` | String or list of strings that appear when a profile is **missing** (negative marker). |
+| `existsMsg`       | optional (`message`) | String or list that appears only when a profile **exists** (positive marker). `{}`-interpolated with the username. Stronger than `errorMsg` for sites that 200 every URL. |
+| `errorCode`       | optional (`status_code`) | Int or list of status codes that mean "not found" even if 200-ish. Also pins a listed ambiguous code (e.g. `403`) back to not-found. |
+| `errorUrl`        | optional (`response_url`) | The URL a **missing** profile redirects to. `{}`-interpolated. When present, redirects are followed and the final URL is compared to it. |
 | `urlProbe`        | optional | Alternate URL to request instead of `url` (e.g. an API). Also `{}`-interpolated. |
 | `regexCheck`      | optional | Regex the username must match for the site to be checked. |
 | `request_method`  | optional | `GET`/`HEAD`/`POST`/`PUT`. Defaults to `HEAD` for pure `status_code`, else `GET`. |
@@ -159,6 +186,37 @@ The manifest is a JSON object: `{ "Site Name": { ...fields... }, ... }`. Fields:
   "username_claimed": "Josh"
 }
 ```
+
+## Email mode (registration checks)
+
+The engine also checks where an **email** is registered (`hunt.py email`, the
+email-search skill). It reuses this same classifier and request layer, so the
+detection fields above (`errorType`, `errorMsg`, `existsMsg`, `errorCode`,
+`response_url`/`errorUrl`) mean the same thing. Email entries live in a separate
+manifest, `data/email_data.json`, and add a few fields for the common multi-step
+pattern (fetch a token/cookie, then POST the email). Results are relabeled
+`registered` / `not_registered`.
+
+| Field | Meaning |
+| --- | --- |
+| `category` | Grouping (dev, social, news, adult, ...). |
+| `loud` | `true` if probing may notify the target (a reset or signup email). Skipped unless `--allow-loud`. |
+| `isNSFW` | `true` for adult sites; excluded unless `--nsfw`. |
+| `urlProbe` | The endpoint to call. `{}` is the email; `{name}` are prefetch captures. |
+| `request_method` | `GET`/`POST`/`PUT`. |
+| `request_payload` | JSON body. `{}` and `{name}` interpolated. |
+| `request_form` | Form-urlencoded body (use instead of payload). Same interpolation. |
+| `prefetch` | Optional first request: `{ "url", "method", "capture": { name: rule } }`. Cookies it sets carry to the probe. A capture rule is `{"regex": "...(group1)..."}` (from the body) or `{"cookie": "NAME", "decode": "url"}` (from a Set-Cookie; `decode` optional). |
+| `existsMsg` / `errorMsg` | Body substrings meaning registered / not-registered (often a JSON field like `"exists":true`). |
+| `existsUrl` | For `response_url`: a redirect to this URL means **registered** (inverse of `errorUrl`). |
+| `extra` | Optional profile harvest: `{ label: {"json": "dotted.path"} | {"regex": "..."} }`, collected when registered. |
+
+Some reference modules are not expressible declaratively (runtime crypto, HTML
+form-action scraping, a token read from a redirect URL, or multipart bodies) and are
+intentionally not ported; grow those, and any new site, with **add-site** in email
+mode. Email endpoints drift faster than profile pages, so confirm with
+`hunt.py verify --email --site "Name"` (set `username_claimed` to a known-registered
+throwaway email first).
 
 ## Adding a new site
 

@@ -1,0 +1,1133 @@
+{
+  "Etsy": {
+    "__comment__": "Ported from kaifcodec/user-scanner user_scanner/email_scan/shopping/etsy.py. Public identity AJAX endpoint; body 'null' => not registered. VERIFY LIVE before relying (endpoints/markers drift).",
+    "category": "shopping",
+    "errorType": "message",
+    "url": "https://www.etsy.com",
+    "urlMain": "https://www.etsy.com/",
+    "urlProbe": "https://www.etsy.com/api/v3/ajax/public/users/by-identity-optional?identity={}",
+    "request_method": "GET",
+    "existsMsg": ["\"user_id\""],
+    "errorMsg": ["null"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "x-detected-locale": "USD|en-US|US",
+      "Referer": "https://www.etsy.com/join/email"
+    },
+    "extra": {
+      "id": {"json": "user_id"},
+      "username": {"json": "login_name"},
+      "name": {"json": "real_name"},
+      "location": {"json": "location"},
+      "is_seller": {"json": "is_seller"},
+      "joined": {"json": "create_date"},
+      "avatar": {"json": "avatar_url"}
+    }
+  },
+  "GitHub": {
+    "__comment__": "Ported from user_scanner/email_scan/dev/github.py. Signup-page CSRF token, then POST /email_validity_checks. VERIFY LIVE before relying.",
+    "category": "dev",
+    "errorType": "message",
+    "url": "https://github.com",
+    "urlMain": "https://github.com/",
+    "prefetch": {
+      "url": "https://github.com/signup",
+      "method": "GET",
+      "capture": {
+        "token": {"regex": "data-csrf=\"true\"\\s+value=\"([^\"]+)\""}
+      }
+    },
+    "request_method": "POST",
+    "urlProbe": "https://github.com/email_validity_checks",
+    "request_form": {
+      "authenticity_token": "{token}",
+      "value": "{}"
+    },
+    "existsMsg": ["already associated with an account"],
+    "errorMsg": ["Email is available"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {
+      "Origin": "https://github.com",
+      "Referer": "https://github.com/signup"
+    }
+  },
+  "Instagram": {
+    "__comment__": "Ported from user_scanner/email_scan/social/instagram.py. Homepage for csrf cookie/token, then POST /api/v1/users/check_email/. Sensitive + bot-protected; VERIFY LIVE before relying.",
+    "category": "social",
+    "errorType": "message",
+    "url": "https://instagram.com",
+    "urlMain": "https://www.instagram.com/",
+    "prefetch": {
+      "url": "https://www.instagram.com/",
+      "method": "GET",
+      "capture": {
+        "token": {"regex": "[\"']csrf_token[\"']\\s*:\\s*[\"']([^\"']+)[\"']"}
+      }
+    },
+    "request_method": "POST",
+    "urlProbe": "https://www.instagram.com/api/v1/users/check_email/",
+    "request_form": {
+      "email": "{}",
+      "sign_up_code": ""
+    },
+    "existsMsg": ["\"email_is_taken\""],
+    "errorMsg": ["\"available\": true", "\"spam\": true"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {
+      "x-csrftoken": "{token}",
+      "x-ig-app-id": "936619743392459",
+      "x-requested-with": "XMLHttpRequest",
+      "Origin": "https://www.instagram.com",
+      "Referer": "https://www.instagram.com/"
+    }
+  },
+  "Spotify": {
+    "__comment__": "Ported from user_scanner/email_scan/music/spotify.py. Signup cookies, then POST signup validate; body 'already_exists' => registered. Embedded api_key may rotate; VERIFY LIVE before relying.",
+    "category": "music",
+    "errorType": "message",
+    "url": "https://spotify.com",
+    "urlMain": "https://www.spotify.com/",
+    "prefetch": {
+      "url": "https://www.spotify.com/us/signup",
+      "method": "GET"
+    },
+    "request_method": "POST",
+    "urlProbe": "https://spclient.wg.spotify.com/signup/public/v2/account/validate",
+    "request_payload": {
+      "fields": [{"field": "FIELD_EMAIL", "value": "{}"}],
+      "client_info": {
+        "api_key": "a1e486e2729f46d6bb368d6b2bcda326",
+        "app_version": "v2",
+        "capabilities": [1],
+        "platform": "www",
+        "client_id": ""
+      }
+    },
+    "existsMsg": ["already_exists"],
+    "errorMsg": ["\"status\":1", "\"success\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {
+      "Origin": "https://www.spotify.com",
+      "Referer": "https://www.spotify.com/"
+    }
+  },
+  "StackOverflow": {
+    "__comment__": "Ported from user-scanner email_scan/community/stackoverflow.py. LOGIN-PROBE: posts email + a dummy password to the login form and reads the error. VERIFY LIVE.",
+    "category": "community",
+    "loud": false,
+    "errorType": "message",
+    "url": "https://stackoverflow.com",
+    "urlMain": "https://stackoverflow.com/",
+    "urlProbe": "https://stackoverflow.com/users/login",
+    "request_method": "POST",
+    "request_form": {"ssrc": "login", "email": "{}", "password": "Password109-grt", "oauth_version": "", "oauth_server": ""},
+    "existsMsg": ["The email or password is incorrect"],
+    "errorMsg": ["No user found with matching email"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {"Origin": "https://stackoverflow.com", "Referer": "https://stackoverflow.com/users/login"}
+  },
+  "Patreon": {
+    "__comment__": "Ported from user-scanner email_scan/creator/patreon.py. Public auth endpoint; next_auth_step password=registered, signup=available. No password submitted. VERIFY LIVE.",
+    "category": "creator",
+    "loud": false,
+    "errorType": "message",
+    "url": "https://patreon.com",
+    "urlMain": "https://www.patreon.com/",
+    "urlProbe": "https://www.patreon.com/api/auth?include=user.null&fields[user]=[]&json-api-version=1.0&json-api-use-default-includes=false",
+    "request_method": "POST",
+    "request_payload": {"data": {"type": "genericPatreonApi", "attributes": {"patreon_auth": {"email": "{}", "allow_account_creation": false}, "auth_context": "auth", "ru": "https://www.patreon.com/home"}, "relationships": {}}},
+    "existsMsg": ["\"next_auth_step\":\"password\""],
+    "errorMsg": ["\"next_auth_step\":\"signup\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {"Content-Type": "application/vnd.api+json", "Origin": "https://www.patreon.com"}
+  },
+  "HubSpot": {
+    "__comment__": "Ported from user-scanner email_scan/crm/hubspot.py. LOGIN-PROBE: posts email + empty password to login-api; INVALID_PASSWORD=registered, INVALID_USER=available. VERIFY LIVE.",
+    "category": "crm",
+    "loud": false,
+    "errorType": "message",
+    "url": "https://hubspot.com",
+    "urlMain": "https://hubspot.com/",
+    "urlProbe": "https://api.hubspot.com/login-api/v1/login",
+    "request_method": "POST",
+    "request_payload": {"email": "{}", "password": "", "rememberLogin": false},
+    "existsMsg": ["\"INVALID_PASSWORD\""],
+    "errorMsg": ["\"INVALID_USER\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {"Origin": "https://app.hubspot.com", "Referer": "https://app.hubspot.com/"}
+  },
+  "Nextdoor": {
+    "__comment__": "Ported from user-scanner email_scan/community/nextdoor.py. LOGIN-PROBE: OAuth token endpoint with email + dummy password; invalid_grant=registered, not_found=available. VERIFY LIVE.",
+    "category": "community",
+    "loud": false,
+    "errorType": "message",
+    "url": "https://nextdoor.com",
+    "urlMain": "https://nextdoor.com/",
+    "urlProbe": "https://auth.nextdoor.com/v2/token",
+    "request_method": "POST",
+    "request_form": {"scope": "openid", "client_id": "NEXTDOOR-WEB", "login_type": "basic", "grant_type": "password", "username": "{}", "password": "vhj87uyguu77"},
+    "existsMsg": ["\"invalid_grant\""],
+    "errorMsg": ["\"not_found\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://nextdoor.com", "Referer": "https://nextdoor.com/"}
+  },
+  "Insightly": {
+    "__comment__": "Ported from user-scanner email_scan/crm/insightly.py. signup/isemailvalid; 'An account exists for this address.'=registered, body 'true'=available. VERIFY LIVE.",
+    "category": "crm",
+    "loud": false,
+    "errorType": "message",
+    "url": "https://insightly.com",
+    "urlMain": "https://insightly.com/",
+    "urlProbe": "https://accounts.insightly.com/signup/isemailvalid",
+    "request_method": "POST",
+    "request_form": {"emailaddress": "{}"},
+    "existsMsg": ["An account exists for this address."],
+    "errorMsg": ["true"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Origin": "https://accounts.insightly.com", "Referer": "https://accounts.insightly.com/?plan=trial"}
+  },
+  "Zoho": {
+    "__comment__": "Ported from user-scanner email_scan/crm/zoho.py. Prefetch signin for the iamcsr cookie -> X-ZCSRF-TOKEN header; lookup endpoint; 'User exists'/status_code 201=registered, 400=available. VERIFY LIVE.",
+    "category": "crm",
+    "loud": false,
+    "errorType": "message",
+    "url": "https://zoho.com",
+    "urlMain": "https://zoho.com/",
+    "prefetch": {"url": "https://accounts.zoho.com/signin", "method": "GET", "capture": {"csr": {"cookie": "iamcsr"}}},
+    "request_method": "POST",
+    "urlProbe": "https://accounts.zoho.com/signin/v2/lookup/{}",
+    "request_form": {"mode": "primary", "servicename": "ZohoCRM", "serviceurl": "https://crm.zoho.com/crm/ShowHomePage.do", "service_language": "en"},
+    "existsMsg": ["User exists", "\"status_code\":201"],
+    "errorMsg": ["\"status_code\":400"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {"X-ZCSRF-TOKEN": "iamcsrcoo={csr}", "Accept": "*/*", "Origin": "https://accounts.zoho.com", "Referer": "https://accounts.zoho.com/"}
+  },
+  "Axonaut": {
+    "__comment__": "Ported from user-scanner email_scan/crm/axonaut.py. Inverted redirect: a 302 to /login?email means REGISTERED; 200 means available. Uses existsUrl. VERIFY LIVE.",
+    "category": "crm",
+    "loud": false,
+    "errorType": "response_url",
+    "url": "https://axonaut.com",
+    "urlMain": "https://axonaut.com/",
+    "urlProbe": "https://axonaut.com/onboarding/?email={}",
+    "existsUrl": "/login?email",
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    "username_claimed": "",
+    "headers": {"Referer": "https://axonaut.com/en"}
+  },
+  "Boot.dev": {
+    "__comment__": "user-scanner email_scan/dev/boot_dev.py. API email/exists; Exists:true=registered. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://boot.dev", "urlMain": "https://boot.dev/",
+    "urlProbe": "https://api.boot.dev/v1/users/email/exists",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["\"Exists\":true", "\"Exists\": true"],
+    "errorMsg": ["\"Exists\":false", "\"Exists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Referer": "https://boot.dev/"}
+  },
+  "Codecademy": {
+    "__comment__": "user-scanner email_scan/dev/codecademy.py. Prefetch /register for csrf-token -> X-CSRF-Token; /register/validate; 'has already been taken'=registered. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://codecademy.com", "urlMain": "https://www.codecademy.com/",
+    "prefetch": {"url": "https://www.codecademy.com/register", "method": "GET", "capture": {"token": {"regex": "name=\"csrf-token\" content=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://www.codecademy.com/register/validate",
+    "request_payload": {"user": {"email": "{}"}},
+    "existsMsg": ["has already been taken"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"X-CSRF-Token": "{token}", "Accept": "application/json", "Origin": "https://www.codecademy.com", "Referer": "https://www.codecademy.com/register?redirect=%2F"}
+  },
+  "Codewars": {
+    "__comment__": "user-scanner email_scan/dev/codewars.py. /join form; 'is already taken'=registered, blank-error=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://codewars.com", "urlMain": "https://www.codewars.com/",
+    "urlProbe": "https://www.codewars.com/join?language=javascript",
+    "request_method": "POST",
+    "request_form": {"utf8": "✓", "_method": "patch", "user[email]": "{}", "user[username]": "", "user[password]": "", "user[password_confirmation]": "", "utm[referrer]": "https://www.google.com/"},
+    "existsMsg": ["is already taken"], "errorMsg": ["can&#39;t be blank"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://www.codewars.com", "Referer": "https://www.codewars.com/join"}
+  },
+  "devRant": {
+    "__comment__": "user-scanner email_scan/dev/devrant.py. api/users form; 'already registered to an account'=registered. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://devrant.com", "urlMain": "https://devrant.com/",
+    "urlProbe": "https://devrant.com/api/users",
+    "request_method": "POST",
+    "request_form": {"app": "3", "type": "1", "email": "{}", "username": "", "password": "", "guid": "", "plat": "3", "sid": "", "seid": ""},
+    "existsMsg": ["already registered to an account"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Origin": "https://devrant.com", "Referer": "https://devrant.com/feed/top/month?login=1"}
+  },
+  "Envato": {
+    "__comment__": "user-scanner email_scan/dev/envato.py. validate_email; 422 'already in use'=registered, 204=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://elements.envato.com", "urlMain": "https://elements.envato.com/",
+    "urlProbe": "https://account.envato.com/api/public/validate_email",
+    "request_method": "POST", "request_payload": {"language_code": "en", "email": "{}"},
+    "existsMsg": ["already in use"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "x-client-version": "3.6.0", "origin": "https://elements.envato.com", "referer": "https://elements.envato.com/"}
+  },
+  "HackerOne": {
+    "__comment__": "user-scanner email_scan/dev/hackerone.py. Prefetch /sign_up for csrf -> x-csrf-token; POST /users; 'has already been taken'=registered. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://hackerone.com", "urlMain": "https://hackerone.com/",
+    "prefetch": {"url": "https://hackerone.com/sign_up", "method": "GET", "capture": {"token": {"regex": "name=\"csrf-token\" content=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://hackerone.com/users",
+    "request_form": {"user[name]": "St33l_h3art", "user[username]": "kn0wl3dg3_is_curs3", "user[email]": "{}", "user[password]": "thisw0rldwasn3v3rg00d", "user[password_confirmation]": "mismatch_on_purpose"},
+    "existsMsg": ["has already been taken"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-csrf-token": "{token}", "Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Origin": "https://hackerone.com", "Referer": "https://hackerone.com/users/sign_up"}
+  },
+  "HackTheBox": {
+    "__comment__": "user-scanner email_scan/dev/hackthebox.py. Prefetch /register for XSRF-TOKEN cookie (url-decoded) -> x-xsrf-token; verify endpoint; 422 'cannot use this email address'=registered, 200/204=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://hackthebox.com", "urlMain": "https://www.hackthebox.com/",
+    "prefetch": {"url": "https://account.hackthebox.com/register", "method": "GET", "capture": {"xsrf": {"cookie": "XSRF-TOKEN", "decode": "url"}}},
+    "request_method": "POST", "urlProbe": "https://account.hackthebox.com/api/v1/user/email/verify",
+    "request_payload": {"email": "{}"},
+    "existsMsg": ["cannot use this email address"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-xsrf-token": "{xsrf}", "Accept": "application/json", "X-Requested-With": "XMLHttpRequest", "Origin": "https://account.hackthebox.com", "Referer": "https://account.hackthebox.com/register"}
+  },
+  "How-To Geek": {
+    "__comment__": "user-scanner email_scan/dev/howtogeek.py. check-user-exists; userExists true=registered, false=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://www.howtogeek.com", "urlMain": "https://www.howtogeek.com/",
+    "urlProbe": "https://www.howtogeek.com/check-user-exists/?email={}",
+    "request_method": "GET",
+    "existsMsg": ["\"userExists\":true", "\"userExists\": true"],
+    "errorMsg": ["\"userExists\":false", "\"userExists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Referer": "https://www.howtogeek.com/"}
+  },
+  "Hugging Face": {
+    "__comment__": "user-scanner email_scan/dev/huggingface.py. api/check-user-email; 'already exists'=registered, 'This email address is available.'=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://huggingface.co", "urlMain": "https://huggingface.co/",
+    "urlProbe": "https://huggingface.co/api/check-user-email",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["already exists"], "errorMsg": ["This email address is available."],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"referer": "https://huggingface.co/join"}
+  },
+  "LeetCode": {
+    "__comment__": "user-scanner email_scan/dev/leetcode.py. LOUD: GraphQL password-reset-by-email emails the target if it exists. ok:true=registered, 'Email does not exist'=available. VERIFY LIVE.",
+    "category": "dev", "loud": true, "errorType": "message",
+    "url": "https://leetcode.com", "urlMain": "https://leetcode.com/",
+    "urlProbe": "https://leetcode.com/graphql/",
+    "request_method": "POST",
+    "request_payload": {"query": "mutation AuthRequestPasswordResetByEmail($email: String!) { authRequestPasswordResetByEmail(email: $email) { ok error } }", "variables": {"email": "{}"}, "operationName": "AuthRequestPasswordResetByEmail"},
+    "existsMsg": ["\"ok\":true", "\"ok\": true"],
+    "errorMsg": ["Email does not exist", "\"ok\":false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-csrftoken": "bMwA82bLs7IrhigK19Bu6uDj4DhZnVnE", "Cookie": "csrftoken=bMwA82bLs7IrhigK19Bu6uDj4DhZnVnE", "Origin": "https://leetcode.com", "Referer": "https://leetcode.com/accounts/password/reset/"}
+  },
+  "Qiita": {
+    "__comment__": "user-scanner email_scan/dev/qiita.py. Prefetch /signup for csrf -> authenticity_token; POST /registration; 'has already been taken'=registered (recaptcha may block live). VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://qiita.com", "urlMain": "https://qiita.com/",
+    "prefetch": {"url": "https://qiita.com/signup?callback_action=login_or_signup&redirect_to=%2F&realm=qiita", "method": "GET", "capture": {"token": {"regex": "name=\"csrf-token\" content=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://qiita.com/registration",
+    "request_form": {"authenticity_token": "{token}", "user[url_name]": "scanner_check_99", "user[email]": "{}", "user[password]": "SafetyMismatch_123!", "g-recaptcha-response": "", "commit": "register", "redirect_to": "/"},
+    "existsMsg": ["has already been taken"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://qiita.com", "Referer": "https://qiita.com/signup"}
+  },
+  "Replit": {
+    "__comment__": "user-scanner email_scan/dev/replit.py. data/user/exists; exists:true=registered. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://replit.com", "urlMain": "https://replit.com/",
+    "urlProbe": "https://replit.com/data/user/exists",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["\"exists\":true", "\"exists\": true"], "errorMsg": ["\"exists\":false", "\"exists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "X-Requested-With": "XMLHttpRequest", "Origin": "https://replit.com", "Referer": "https://replit.com/signup"}
+  },
+  "Wix": {
+    "__comment__": "user-scanner email_scan/dev/wix.py. userAccountsByEmail; 200=registered, 404=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "status_code",
+    "url": "https://wix.com", "urlMain": "https://wix.com/",
+    "urlProbe": "https://users.wix.com/wix-users/v1/userAccountsByEmail",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "x-wix-client-artifact-id": "login-react-app", "Origin": "https://users.wix.com", "Referer": "https://users.wix.com/signin/signup"}
+  },
+  "WordPress": {
+    "__comment__": "user-scanner email_scan/dev/wordpress.py. auth-options (http_envelope); inner code 200=registered, 404 unknown_user=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://wordpress.com", "urlMain": "https://wordpress.com/",
+    "urlProbe": "https://public-api.wordpress.com/rest/v1.1/users/{}/auth-options?http_envelope=1",
+    "request_method": "GET",
+    "existsMsg": ["\"code\":200", "\"code\": 200"], "errorMsg": ["unknown_user", "\"code\":404"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "Referer": "https://public-api.wordpress.com/wp-admin/rest-proxy/?v=2.0"}
+  },
+  "XDA": {
+    "__comment__": "user-scanner email_scan/dev/xda.py. check-user-exists; userExists true=registered, false=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://xda-developers.com", "urlMain": "https://www.xda-developers.com/",
+    "urlProbe": "https://www.xda-developers.com/check-user-exists/?email={}&subscribe=true",
+    "request_method": "GET",
+    "existsMsg": ["\"userExists\":true", "\"userExists\": true"], "errorMsg": ["\"userExists\":false", "\"userExists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "Referer": "https://www.xda-developers.com/"}
+  },
+  "Wondershare": {
+    "__comment__": "user-scanner email_scan/dev/wondershare.py. Prefetch csrf-token -> req_identity cookie -> x-csrf-token; PUT account/inspect; exist 1=registered, 2=available. VERIFY LIVE.",
+    "category": "dev", "loud": false, "errorType": "message",
+    "url": "https://wondershare.com", "urlMain": "https://wondershare.com/",
+    "prefetch": {"url": "https://accounts.wondershare.com/api/v3/csrf-token", "method": "GET", "capture": {"token": {"cookie": "req_identity"}}},
+    "request_method": "PUT", "urlProbe": "https://accounts.wondershare.com/api/v3/account/inspect",
+    "request_payload": {"email": "{}"},
+    "existsMsg": ["\"exist\":1", "\"exist\": 1"], "errorMsg": ["\"exist\":2", "\"exist\": 2"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-csrf-token": "{token}", "Accept": "application/json, text/plain, */*", "x-lang": "en-us", "Origin": "https://accounts.wondershare.com", "Referer": "https://accounts.wondershare.com/m/register"}
+  },
+  "Anilist": {
+    "__comment__": "user-scanner email_scan/entertainment/anilist.py. LOUD: GraphQL ResetPassword. 'unauthorized'=registered, 'invalid'=available. VERIFY LIVE.",
+    "category": "entertainment", "loud": true, "errorType": "message",
+    "url": "https://anilist.co", "urlMain": "https://anilist.co/",
+    "urlProbe": "https://anilist.co/graphql",
+    "request_method": "POST",
+    "request_payload": {"query": "mutation($email:String){ResetPassword(email:$email)}", "variables": {"email": "{}"}},
+    "existsMsg": ["unauthorized", "Unauthorized"], "errorMsg": ["invalid", "Invalid"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "schema": "internal", "Origin": "https://anilist.co", "Referer": "https://anilist.co/forgot-password"}
+  },
+  "Letterboxd": {
+    "__comment__": "user-scanner email_scan/entertainment/letterboxd.py. Prefetch /sign-in for csrf cookie -> __csrf; register.do; 'already associated with an account'=registered (recaptcha may block). VERIFY LIVE.",
+    "category": "entertainment", "loud": false, "errorType": "message",
+    "url": "https://letterboxd.com", "urlMain": "https://letterboxd.com/",
+    "prefetch": {"url": "https://letterboxd.com/sign-in/", "method": "GET", "capture": {"csrf": {"cookie": "com.xk72.webparts.csrf"}}},
+    "request_method": "POST", "urlProbe": "https://letterboxd.com/user/standalone/register.do",
+    "request_form": {"__csrf": "{csrf}", "token": "", "emailAddress": "{}", "username": "th3_t3erminal_w0rri0r", "password": "n3v3r_F3lt_softn3ss", "termsAndAge": "true", "g-recaptcha-response": "", "h-captcha-response": ""},
+    "existsMsg": ["already associated with an account"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Origin": "https://letterboxd.com", "Referer": "https://letterboxd.com/register/standalone/"}
+  },
+  "MyAnimeList": {
+    "__comment__": "user-scanner email_scan/entertainment/myanimelist.py. signup/email/validate; 'already have an account'=registered. VERIFY LIVE.",
+    "category": "entertainment", "loud": false, "errorType": "message",
+    "url": "https://myanimelist.net", "urlMain": "https://myanimelist.net/",
+    "urlProbe": "https://myanimelist.net/signup/email/validate",
+    "request_method": "POST", "request_form": {"email": "{}"},
+    "existsMsg": ["already have an account"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "X-Requested-With": "XMLHttpRequest", "Origin": "https://myanimelist.net", "Referer": "https://myanimelist.net/register.php?"}
+  },
+  "Netflix": {
+    "__comment__": "user-scanner email_scan/entertainment/netflix.py. LOUD. Prefetch home for flwssn cookie -> payload; graphql persisted query; 'Welcome back!'=registered. Persisted-query id may change. VERIFY LIVE.",
+    "category": "entertainment", "loud": true, "errorType": "message",
+    "url": "https://netflix.com", "urlMain": "https://www.netflix.com/",
+    "prefetch": {"url": "https://www.netflix.com/", "method": "GET", "capture": {"flwssn": {"cookie": "flwssn"}}},
+    "request_method": "POST", "urlProbe": "https://web.prod.cloud.netflix.com/graphql",
+    "request_payload": {"operationName": "CLCSWebInitSignup", "variables": {"inputUserJourneyNode": "WELCOME", "locale": "en-US", "inputFields": [{"name": "flwssn", "value": {"stringValue": "{flwssn}"}}, {"name": "email", "value": {"stringValue": "{}"}}]}, "extensions": {"persistedQuery": {"id": "f6e8ddc6-79fb-4ff2-8e55-893d707887a4", "version": 102}}},
+    "existsMsg": ["Welcome back!"], "errorMsg": ["sign-up link", "create your account"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-netflix.context.operation-name": "CLCSWebInitSignup", "x-netflix.request.clcs.bucket": "high", "Origin": "https://www.netflix.com", "Referer": "https://www.netflix.com/"}
+  },
+  "Apple TV": {
+    "__comment__": "user-scanner email_scan/entertainment/appletv.py. appleauth federate; 'primaryAuthOptions' present=registered. VERIFY LIVE.",
+    "category": "entertainment", "loud": false, "errorType": "message",
+    "url": "https://tv.apple.com", "urlMain": "https://tv.apple.com/",
+    "urlProbe": "https://idmsa.apple.com/appleauth/auth/federate?isRememberMeEnabled=false",
+    "request_method": "POST", "request_payload": {"accountName": "{}", "rememberMe": false},
+    "existsMsg": ["primaryAuthOptions"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "X-Apple-Domain-Id": "2", "X-Apple-Auth-Context": "tv", "X-Requested-With": "XMLHttpRequest", "Origin": "https://idmsa.apple.com", "Referer": "https://idmsa.apple.com/"}
+  },
+  "JustWatch": {
+    "__comment__": "user-scanner email_scan/entertainment/justwatch.py. Firebase createAuthUri; registered:true=registered. VERIFY LIVE.",
+    "category": "entertainment", "loud": false, "errorType": "message",
+    "url": "https://justwatch.com", "urlMain": "https://www.justwatch.com/",
+    "urlProbe": "https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=AIzaSyDv6JIzdDvbTBS-JWdR4Kl22UvgWGAyuo8",
+    "request_method": "POST", "request_payload": {"identifier": "{}", "continueUri": "https://www.justwatch.com/"},
+    "existsMsg": ["\"registered\":true", "\"registered\": true"], "errorMsg": ["\"registered\":false", "\"registered\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-client-version": "Chrome/JsCore/10.14.1/FirebaseCore-web", "origin": "https://www.justwatch.com", "referer": "https://www.justwatch.com/"}
+  },
+  "Stremio": {
+    "__comment__": "user-scanner email_scan/entertainment/stremio.py. LOGIN-PROBE: api/login with wrong password; error.wrongPass=registered, wrongEmail=available. VERIFY LIVE.",
+    "category": "entertainment", "loud": false, "errorType": "message",
+    "url": "https://stremio.com", "urlMain": "https://www.stremio.com/",
+    "urlProbe": "https://api.strem.io/api/login",
+    "request_method": "POST", "request_payload": {"authKey": null, "email": "{}", "password": "wrongpassword123"},
+    "existsMsg": ["\"wrongPass\":true", "\"wrongPass\": true"], "errorMsg": ["\"wrongEmail\":true", "\"wrongEmail\": true"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://www.stremio.com", "Referer": "https://www.stremio.com/"}
+  },
+  "MyFitnessPal": {
+    "__comment__": "user-scanner email_scan/fitness/myfitnesspal.py. api/idm/user-exists; emailExists true=registered, false=available. VERIFY LIVE.",
+    "category": "fitness", "loud": false, "errorType": "message",
+    "url": "https://www.myfitnesspal.com", "urlMain": "https://www.myfitnesspal.com/",
+    "urlProbe": "https://www.myfitnesspal.com/api/idm/user-exists?email={}",
+    "request_method": "GET",
+    "existsMsg": ["\"emailExists\":true", "\"emailExists\": true"], "errorMsg": ["\"emailExists\":false", "\"emailExists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Referer": "https://www.myfitnesspal.com/account/create"}
+  },
+  "Chess.com": {
+    "__comment__": "user-scanner email_scan/gaming/chess_com.py. EmailValidationService; EMAIL_STATUS_TAKEN=registered, EMAIL_STATUS_AVAILABLE=available. VERIFY LIVE.",
+    "category": "gaming", "loud": false, "errorType": "message",
+    "url": "https://chess.com", "urlMain": "https://www.chess.com/",
+    "urlProbe": "https://www.chess.com/rpc/chesscom.authentication.v1.EmailValidationService/Validate",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["EMAIL_STATUS_TAKEN"], "errorMsg": ["EMAIL_STATUS_AVAILABLE"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "connect-protocol-version": "1", "Origin": "https://www.chess.com", "Referer": "https://www.chess.com/register"}
+  },
+  "Nebula": {
+    "__comment__": "user-scanner email_scan/entertainment/nebula_tv.py. auth/registration; email 'already registered'=registered. VERIFY LIVE.",
+    "category": "entertainment", "loud": false, "errorType": "message",
+    "url": "https://nebula.tv", "urlMain": "https://nebula.tv/",
+    "urlProbe": "https://nebula.tv/auth/registration/",
+    "request_method": "POST", "request_payload": {"email": "{}", "password": "5", "agreed_to_terms": true, "opt_in_to_communications": false},
+    "existsMsg": ["already registered"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "nebula-app-version": "26.3.0", "nebula-platform": "web", "Origin": "https://nebula.tv", "Referer": "https://nebula.tv/join"}
+  },
+  "FitnessBlender": {
+    "__comment__": "user-scanner email_scan/fitness/fitnessblender.py. Prefetch home for XSRF-TOKEN cookie (url-decoded) -> x-csrf-token; validate/unique-email; 'already registered'=registered. VERIFY LIVE.",
+    "category": "fitness", "loud": false, "errorType": "message",
+    "url": "https://www.fitnessblender.com", "urlMain": "https://www.fitnessblender.com/",
+    "prefetch": {"url": "https://www.fitnessblender.com", "method": "GET", "capture": {"csrf": {"cookie": "XSRF-TOKEN", "decode": "url"}}},
+    "request_method": "POST", "urlProbe": "https://www.fitnessblender.com/api/v1/validate/unique-email",
+    "request_payload": {"email": "{}", "force": 0},
+    "existsMsg": ["already registered"], "errorMsg": ["\"message\":\"ok\"", "\"message\": \"ok\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-csrf-token": "{csrf}", "Accept": "application/json, text/plain, */*", "X-Requested-With": "XMLHttpRequest", "Origin": "https://www.fitnessblender.com", "Referer": "https://www.fitnessblender.com/join"}
+  },
+  "AddictingGames": {
+    "__comment__": "user-scanner email_scan/gaming/addictinggames.py. registerpass; 'mail: The email address'=registered, only username taken=available. VERIFY LIVE.",
+    "category": "gaming", "loud": false, "errorType": "message",
+    "url": "https://addictinggames.com", "urlMain": "https://www.addictinggames.com/",
+    "urlProbe": "https://prod.addictinggames.com/user/registerpass?_format=json",
+    "request_method": "POST", "request_payload": {"name": [{"value": "tierd_knight"}], "mail": [{"value": "{}"}], "pass": [{"value": "n0_0ne_asked_just_fight"}], "field_opt_in": [{"value": false}]},
+    "existsMsg": ["mail: The email address"], "errorMsg": ["name: The username tierd_knight is already taken"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://www.addictinggames.com", "Referer": "https://www.addictinggames.com/"}
+  },
+  "CrazyGames": {
+    "__comment__": "user-scanner email_scan/gaming/crazygames.py. Firebase createAuthUri; registered:true=registered. VERIFY LIVE.",
+    "category": "gaming", "loud": false, "errorType": "message",
+    "url": "https://crazygames.com", "urlMain": "https://www.crazygames.com/",
+    "urlProbe": "https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=AIzaSyAkBGn9sKEUBSMQ9CTFyHHxXas0tdcpts8",
+    "request_method": "POST", "request_payload": {"identifier": "{}", "continueUri": "https://www.crazygames.com/"},
+    "existsMsg": ["\"registered\":true", "\"registered\": true"], "errorMsg": ["\"registered\":false", "\"registered\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"origin": "https://www.crazygames.com", "referer": "https://www.crazygames.com/"}
+  },
+  "Neocities": {
+    "__comment__": "user-scanner email_scan/hosting/neocities.py. create_validate; 'already exists'=registered, result ok=available. VERIFY LIVE.",
+    "category": "hosting", "loud": false, "errorType": "message",
+    "url": "https://neocities.org", "urlMain": "https://neocities.org/",
+    "urlProbe": "https://neocities.org/create_validate",
+    "request_method": "POST", "request_form": {"field": "email", "value": "{}", "is_education": "false"},
+    "existsMsg": ["already exists"], "errorMsg": ["\"result\":\"ok\"", "\"result\": \"ok\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "X-Requested-With": "XMLHttpRequest", "Origin": "https://neocities.org", "Referer": "https://neocities.org/"}
+  },
+  "Bunny": {
+    "__comment__": "user-scanner email_scan/hosting/bunny.py. auth/register (dummy password); 'already in use'/Field email=registered, 'passwords must have'=available. VERIFY LIVE.",
+    "category": "hosting", "loud": false, "errorType": "message",
+    "url": "https://bunny.net", "urlMain": "https://dash.bunny.net/",
+    "urlProbe": "https://api.bunny.net/auth/register",
+    "request_method": "POST",
+    "request_payload": {"AffiliateCode": "9sa3wl8vst", "PowToken": "39bbb876b0e4f380:e80448fecdf5d1a40fcabf2e20d79c", "Email": "{}", "Password": "th3_knight_n3v3r_had_th3_st33l_h3rt_it_was_an_arm0r", "Utm": {"pk_buttonlocation": "menu", "ref_domain": "https://www.saashub.com/"}},
+    "existsMsg": ["already in use", "\"Field\":\"email\"", "\"Field\": \"email\""], "errorMsg": ["passwords must have", "Passwords must have"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://dash.bunny.net", "Referer": "https://dash.bunny.net/"}
+  },
+  "Render": {
+    "__comment__": "user-scanner email_scan/hosting/render.py. graphql signUp (dummy password); email exists=registered, hcaptcha invalid=available. VERIFY LIVE.",
+    "category": "hosting", "loud": false, "errorType": "message",
+    "url": "https://render.com", "urlMain": "https://render.com/",
+    "urlProbe": "https://api.render.com/graphql",
+    "request_method": "POST",
+    "request_payload": {"operationName": "signUp", "variables": {"signup": {"email": "{}", "githubId": "", "name": "", "githubToken": "", "googleId": "", "gitlabId": "", "bitbucketId": "", "inviteCode": "", "password": "StandardPassword123!", "newsletterOptIn": false, "next": ""}}, "query": "mutation signUp($signup: SignupInput!) { signUp(signup: $signup) { idToken __typename } }"},
+    "existsMsg": ["\"email\":\"exists\""], "errorMsg": ["\"hcaptcha_token\":\"invalid\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"origin": "https://dashboard.render.com", "referer": "https://dashboard.render.com/register"}
+  },
+  "Freelancer": {
+    "__comment__": "user-scanner email_scan/jobs/freelancer.py. users/check; 409 EMAIL_ALREADY_IN_USE=registered, 200=available. VERIFY LIVE.",
+    "category": "jobs", "loud": false, "errorType": "message",
+    "url": "https://freelancer.com", "urlMain": "https://www.freelancer.com/",
+    "urlProbe": "https://www.freelancer.com/api/users/0.1/users/check?compact=true&new_errors=true",
+    "request_method": "POST", "request_payload": {"user": {"email": "{}"}},
+    "existsMsg": ["EMAIL_ALREADY_IN_USE"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://www.freelancer.com"}
+  },
+  "Coursera": {
+    "__comment__": "user-scanner email_scan/learning/coursera.py. userAccounts getLoginMethods; non-empty loginMethods=registered. VERIFY LIVE.",
+    "category": "learning", "loud": false, "errorType": "message",
+    "url": "https://coursera.org", "urlMain": "https://www.coursera.org/",
+    "urlProbe": "https://www.coursera.org/api/userAccounts.v1?action=getLoginMethods&email={}",
+    "request_method": "POST", "request_payload": {},
+    "existsMsg": ["\"loginMethods\":[{", "\"loginMethods\": [{", "\"loginMethods\":[\""], "errorMsg": ["\"loginMethods\":[]", "\"loginMethods\": []"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "X-Requested-With": "XMLHttpRequest", "X-Coursera-Application": "front-page", "Origin": "https://www.coursera.org", "Referer": "https://www.coursera.org/?authMode=signup"}
+  },
+  "Duolingo": {
+    "__comment__": "user-scanner email_scan/learning/duolingo.py. users?email=; non-empty users=registered. VERIFY LIVE.",
+    "category": "learning", "loud": false, "errorType": "message",
+    "url": "https://duolingo.com", "urlMain": "https://www.duolingo.com/",
+    "urlProbe": "https://www.duolingo.com/2017-06-30/users?email={}",
+    "request_method": "GET",
+    "existsMsg": ["\"users\":[{", "\"users\": [{"], "errorMsg": ["\"users\":[]", "\"users\": []"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Referer": "https://www.duolingo.com/"}
+  },
+  "Alison": {
+    "__comment__": "user-scanner email_scan/learning/alison.py. Prefetch /register for _token; POST /register; 'The signup email has already been taken'=registered. VERIFY LIVE.",
+    "category": "learning", "loud": false, "errorType": "message",
+    "url": "https://alison.com", "urlMain": "https://alison.com/",
+    "prefetch": {"url": "https://alison.com/register", "method": "GET", "capture": {"token": {"regex": "name=\"_token\"\\s+value=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://alison.com/register",
+    "request_form": {"_token": "{token}", "firstname": "The", "lastname": "SilentSowrd", "signup_email": "{}", "signup_password": "", "signup_tc_social": "1", "current": "https://alison.com", "route_name": "site.home"},
+    "existsMsg": ["The signup email has already been taken"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://alison.com", "Referer": "https://alison.com/"}
+  },
+  "Allen": {
+    "__comment__": "user-scanner email_scan/learning/allen.py. identities/{email}; reason OK=registered, 'Invalid email'=available. VERIFY LIVE.",
+    "category": "learning", "loud": false, "errorType": "message",
+    "url": "https://allen.in", "urlMain": "https://allen.in/",
+    "urlProbe": "https://api.allen-live.in/api/v1/user/identities/{}?communicable=true&identity_type=EMAIL",
+    "request_method": "GET",
+    "existsMsg": ["\"reason\":\"OK\"", "\"reason\": \"OK\""], "errorMsg": ["Invalid email"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "x-client-type": "mweb", "Origin": "https://allen.in", "Referer": "https://allen.in/"}
+  },
+  "Vedantu": {
+    "__comment__": "user-scanner email_scan/learning/vedantu.py. preLoginVerification; emailExists true=registered (harvests masked phone). VERIFY LIVE.",
+    "category": "learning", "loud": false, "errorType": "message",
+    "url": "https://www.vedantu.com", "urlMain": "https://www.vedantu.com/",
+    "urlProbe": "https://user.vedantu.com/user/preLoginVerification",
+    "request_method": "POST",
+    "request_payload": {"email": "{}", "phoneCode": null, "phoneNumber": null, "version": 2, "ver": 1.033, "token": "", "sType": "", "sValue": "", "event": "NEW_FLOW"},
+    "existsMsg": ["\"emailExists\":true", "\"emailExists\": true"], "errorMsg": ["\"emailExists\":false", "\"emailExists\": false"],
+    "extra": {"phone": {"json": "phone"}},
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://www.vedantu.com", "Referer": "https://www.vedantu.com/"}
+  },
+  "Mixcloud": {
+    "__comment__": "user-scanner email_scan/music/mixcloud.py. email-register; $errors.email 'already in use'=registered. VERIFY LIVE.",
+    "category": "music", "loud": false, "errorType": "message",
+    "url": "https://mixcloud.com", "urlMain": "https://www.mixcloud.com/",
+    "urlProbe": "https://app.mixcloud.com/authentication/email-register/",
+    "request_method": "POST", "request_form": {"email": "{}", "username": "you_ar3_al0n3_fight", "password": "", "ch": "y"},
+    "existsMsg": ["already in use"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "X-Requested-With": "XMLHttpRequest", "x-mixcloud-platform": "www", "Origin": "https://www.mixcloud.com", "Referer": "https://www.mixcloud.com/"}
+  },
+  "Gaana": {
+    "__comment__": "user-scanner email_scan/music/gaana.py. JSSO checkUserExists; VERIFIED/UNVERIFIED_EMAIL=registered, SUCCESS=available. VERIFY LIVE.",
+    "category": "music", "loud": false, "errorType": "message",
+    "url": "https://gaana.com", "urlMain": "https://gaana.com/",
+    "urlProbe": "https://jsso.indiatimes.com/sso/crossapp/identity/web/checkUserExists",
+    "request_method": "POST", "request_payload": {"identifier": "{}"},
+    "existsMsg": ["VERIFIED_EMAIL", "UNVERIFIED_EMAIL"], "errorMsg": ["\"status\":\"SUCCESS\"", "\"status\": \"SUCCESS\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "channel": "gaana.com", "platform": "WAP", "sdkversion": "0.7.3", "isjssocrosswalk": "true", "origin": "https://gaana.com", "referer": "https://gaana.com/"}
+  },
+  "CNN": {
+    "__comment__": "user-scanner email_scan/news/cnn.py. identity endpoint (dummy credential); 'identity.already.in.use'=registered. VERIFY LIVE.",
+    "category": "news", "loud": false, "errorType": "message",
+    "url": "https://cnn.com", "urlMain": "https://cnn.com/",
+    "urlProbe": "https://audience.cnn.com/core/api/1/identity",
+    "request_method": "POST",
+    "request_payload": {"identityRequests": [{"identityType": "EMAIL", "principal": "{}", "credential": "th3_sil3nt_fir3wall_hid3s_most"}]},
+    "existsMsg": ["identity.already.in.use"], "errorMsg": ["cnn.createprofile"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-client-application": "Android|Android 10|Chrome 144.0.0.0", "Origin": "https://edition.cnn.com", "Referer": "https://edition.cnn.com/"}
+  },
+  "NYTimes": {
+    "__comment__": "user-scanner email_scan/news/nytimes.py. Prefetch enter-email for authToken; check; show-login=registered, show-register=available. Best-effort token regex; VERIFY LIVE.",
+    "category": "news", "loud": false, "errorType": "message",
+    "url": "https://nytimes.com", "urlMain": "https://nytimes.com/",
+    "prefetch": {"url": "https://myaccount.nytimes.com/auth/enter-email?response_type=cookie&client_id=vi&redirect_uri=https%3A%2F%2Fwww.nytimes.com", "method": "GET", "capture": {"token": {"regex": "authToken(?:&quot;|\")\\s*:\\s*(?:&quot;|\")([A-Za-z0-9._-]+)"}}},
+    "request_method": "POST", "urlProbe": "https://myaccount.nytimes.com/svc/lire_ui/authorize-email/check",
+    "request_payload": {"email": "{}", "auth_token": "{token}", "form_view": "enterEmail", "environment": "production"},
+    "existsMsg": ["show-login"], "errorMsg": ["show-register"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "req-details": "[[it:lui]]", "Origin": "https://myaccount.nytimes.com", "Referer": "https://myaccount.nytimes.com/auth/enter-email"}
+  },
+  "Fox News": {
+    "__comment__": "user-scanner email_scan/news/foxnews.py. id.fox.com status; found:true=registered, false=available. VERIFY LIVE.",
+    "category": "news", "loud": false, "errorType": "message",
+    "url": "https://foxnews.com", "urlMain": "https://foxnews.com/",
+    "urlProbe": "https://id.fox.com/status/v1/status?email={}",
+    "request_method": "GET",
+    "existsMsg": ["\"found\":true", "\"found\": true"], "errorMsg": ["\"found\":false", "\"found\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "*/*", "x-api-key": "049f8b7844b84b9cb5f830f28f08648c", "origin": "https://auth.fox.com", "referer": "https://auth.fox.com/"}
+  },
+  "Al Jazeera": {
+    "__comment__": "user-scanner email_scan/news/aljazeera.py. Firebase createAuthUri; registered:true=registered. VERIFY LIVE.",
+    "category": "news", "loud": false, "errorType": "message",
+    "url": "https://aljazeera.com", "urlMain": "https://www.aljazeera.com/",
+    "urlProbe": "https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=AIzaSyDWz9TZvPscN7qFdG6z1bvLh98eXVBSUPM",
+    "request_method": "POST", "request_payload": {"identifier": "{}", "continueUri": "https://www.aljazeera.com/account/sign-up"},
+    "existsMsg": ["\"registered\":true", "\"registered\": true"], "errorMsg": ["\"registered\":false", "\"registered\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://www.aljazeera.com", "Referer": "https://www.aljazeera.com/"}
+  },
+  "Times of India": {
+    "__comment__": "user-scanner email_scan/news/indiatimes.py. JSSO checkUserExists (toi); VERIFIED/UNVERIFIED_EMAIL=registered, UNREGISTERED_EMAIL=available. VERIFY LIVE.",
+    "category": "news", "loud": false, "errorType": "message",
+    "url": "https://timesofindia.indiatimes.com", "urlMain": "https://timesofindia.indiatimes.com/",
+    "urlProbe": "https://jsso.indiatimes.com/sso/crossapp/identity/web/checkUserExists",
+    "request_method": "POST", "request_payload": {"identifier": "{}"},
+    "existsMsg": ["VERIFIED_EMAIL", "UNVERIFIED_EMAIL"], "errorMsg": ["UNREGISTERED_EMAIL"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"sdkversion": "0.8.1", "channel": "toi", "platform": "WAP", "Origin": "https://timesofindia.indiatimes.com", "Referer": "https://timesofindia.indiatimes.com/"}
+  },
+  "Any.do": {
+    "__comment__": "user-scanner email_scan/other/anydo.py. check_email; user_exists true=registered. VERIFY LIVE.",
+    "category": "other", "loud": false, "errorType": "message",
+    "url": "https://any.do", "urlMain": "https://any.do/",
+    "urlProbe": "https://sm-prod2.any.do/check_email",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["\"user_exists\":true", "\"user_exists\": true"], "errorMsg": ["\"user_exists\":false", "\"user_exists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "*/*", "Origin": "https://desktop.any.do", "Referer": "https://desktop.any.do/"}
+  },
+  "DeviantArt": {
+    "__comment__": "user-scanner email_scan/other/deviantart.py. Prefetch /join for __CSRF_TOKEN__; POST signup2; 'That email address is already in use.'=registered. VERIFY LIVE.",
+    "category": "other", "loud": false, "errorType": "message",
+    "url": "https://www.deviantart.com", "urlMain": "https://www.deviantart.com/",
+    "prefetch": {"url": "https://www.deviantart.com/join/", "method": "GET", "capture": {"token": {"regex": "window\\.__CSRF_TOKEN__\\s*=\\s*'([^']+)'"}}},
+    "request_method": "POST", "urlProbe": "https://www.deviantart.com/_sisu/do/signup2",
+    "request_form": {"referer": "https://www.deviantart.com/", "referer_type": "", "csrf_token": "{token}", "join_mode": "email", "oauth": "0", "email": "{}", "password": "", "username": "scanner_test_99", "dobMonth": "6", "dobDay": "6", "dobYear": "1998"},
+    "existsMsg": ["That email address is already in use."],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://www.deviantart.com", "Referer": "https://www.deviantart.com/join/"}
+  },
+  "Eventbrite": {
+    "__comment__": "user-scanner email_scan/other/eventbrite.py. Prefetch /signin for csrftoken cookie -> X-CSRFToken; users/lookup; exists:true=registered. VERIFY LIVE.",
+    "category": "other", "loud": false, "errorType": "message",
+    "url": "https://eventbrite.com", "urlMain": "https://www.eventbrite.com/",
+    "prefetch": {"url": "https://www.eventbrite.com/signin/", "method": "GET", "capture": {"csrf": {"cookie": "csrftoken"}}},
+    "request_method": "POST", "urlProbe": "https://www.eventbrite.com/api/v3/users/lookup/",
+    "request_payload": {"email": "{}"},
+    "existsMsg": ["\"exists\":true", "\"exists\": true"], "errorMsg": ["\"exists\":false", "\"exists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"X-CSRFToken": "{csrf}", "Accept": "*/*", "X-Requested-With": "XMLHttpRequest", "Origin": "https://www.eventbrite.com", "Referer": "https://www.eventbrite.com/signin/"}
+  },
+  "AMA": {
+    "__comment__": "user-scanner email_scan/other/ama.py. LOUD: resetPassword. httpCode 200 'sent successfully'=registered, 202/'not found'=available. VERIFY LIVE.",
+    "category": "other", "loud": true, "errorType": "message",
+    "url": "https://www.ama-assn.org", "urlMain": "https://www.ama-assn.org/",
+    "urlProbe": "https://fsso.ama-assn.org/api/resetPassword",
+    "request_method": "POST",
+    "request_payload": {"emailAddressOrPhone": "{}", "fedType": "oAuth", "returnUrl": "/AMAresources", "refererUrl": "/AMAresources", "successUrl": "https://www.ama-assn.org/", "appCxUrl": "https://www.ama-assn.org/"},
+    "existsMsg": ["sent successfully"], "errorMsg": ["not found", "please use an existing account", "\"httpCode\":202"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://fsso.ama-assn.org", "Referer": "https://www.ama-assn.org", "Cookie": "IV_JCT=%2Flogin;"}
+  },
+  "Firefox": {
+    "__comment__": "user-scanner email_scan/other/firefox.py. account/status (form); exists:true=registered. VERIFY LIVE.",
+    "category": "other", "loud": false, "errorType": "message",
+    "url": "https://firefox.com", "urlMain": "https://www.mozilla.org/firefox/",
+    "urlProbe": "https://api.accounts.firefox.com/v1/account/status",
+    "request_method": "POST", "request_form": {"email": "{}"},
+    "existsMsg": ["\"exists\":true", "\"exists\": true"], "errorMsg": ["\"exists\":false", "\"exists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json"}
+  },
+  "Office 365": {
+    "__comment__": "user-scanner email_scan/other/office365.py. autodiscover.json/{email}; HTTP 200=registered, else available. VERIFY LIVE.",
+    "category": "other", "loud": false, "errorType": "status_code",
+    "url": "https://office365.com", "urlMain": "https://office365.com/",
+    "urlProbe": "https://outlook.office365.com/autodiscover/autodiscover.json/v1.0/{}?Protocol=Autodiscoverv1",
+    "request_method": "GET",
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"User-Agent": "Microsoft Office/16.0 (Windows NT 10.0; Microsoft Outlook 16.0.12026; Pro)", "Accept": "application/json"}
+  },
+  "Moz": {
+    "__comment__": "user-scanner email_scan/other/moz.py. jsonrpc user.create.validate (dummy password); 'param-is-duplicate'=registered. VERIFY LIVE.",
+    "category": "other", "loud": false, "errorType": "message",
+    "url": "https://moz.com", "urlMain": "https://moz.com/",
+    "urlProbe": "https://moz.com/app-api/jsonrpc/user.create.validate",
+    "request_method": "POST",
+    "request_payload": {"jsonrpc": "2.0", "id": "scanner-check", "method": "user.create.validate", "params": {"data": {"create_session": true, "verification_email_redirect": "/checkout/freetrial/billing-payment/pro_medium/monthly", "user": {"email": "{}", "password": "W3n3v3r_t0uch3d_s0ftn33s"}}}},
+    "existsMsg": ["param-is-duplicate"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"origin": "https://moz.com", "referer": "https://moz.com/checkout/freetrial/signup/pro_medium/monthly"}
+  },
+  "Screener": {
+    "__comment__": "user-scanner email_scan/other/screener.py. Prefetch /register for csrf+token; POST; 'User account with this Email already exists'=registered. VERIFY LIVE.",
+    "category": "other", "loud": false, "errorType": "message",
+    "url": "https://www.screener.in", "urlMain": "https://www.screener.in/",
+    "prefetch": {"url": "https://www.screener.in/register/", "method": "GET", "capture": {"csrf": {"regex": "name=\"csrfmiddlewaretoken\" value=\"([^\"]+)\""}, "token": {"regex": "name=\"token\" value=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://www.screener.in/register/",
+    "request_form": {"csrfmiddlewaretoken": "{csrf}", "next": "", "token": "{token}", "email": "{}", "email2": "{}", "password": ""},
+    "existsMsg": ["User account with this Email already exists"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://www.screener.in", "Referer": "https://www.screener.in/register/"}
+  },
+  "Flipkart": {
+    "__comment__": "user-scanner email_scan/shopping/flipkart.py. LOUD. action/view; supportedAuthenticationTypes=password=registered, 'Looks like you're new here!'=available. VERIFY LIVE.",
+    "category": "shopping", "loud": true, "errorType": "message",
+    "url": "https://flipkart.com", "urlMain": "https://www.flipkart.com/",
+    "urlProbe": "https://2.rome.api.flipkart.com/1/action/view",
+    "request_method": "POST",
+    "request_payload": {"actionRequestContext": {"type": "LOGIN_IDENTITY_VERIFY", "loginIdPrefix": "", "loginId": "{}", "clientQueryParamMap": {"ret": "/"}, "loginType": "EMAIL", "verificationType": "PASSWORD", "screenName": "LOGIN_V4_EMAIL", "sourceContext": "SIGNUP_REDIRECT"}},
+    "existsMsg": ["supportedAuthenticationTypes=password"], "errorMsg": ["Looks like you're new here!"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"X-User-Agent": "Mozilla/5.0 (Linux; Android 10; K) Mobile FKUA/msite/0.0.3/msite/Mobile", "Origin": "https://www.flipkart.com", "Referer": "https://www.flipkart.com/"}
+  },
+  "Vivino": {
+    "__comment__": "user-scanner email_scan/shopping/vivino.py. LOGIN-PROBE: api/login (wrong password); 'The supplied email does not exist'=available, else registered. VERIFY LIVE.",
+    "category": "shopping", "loud": false, "errorType": "message",
+    "url": "https://vivino.com", "urlMain": "https://www.vivino.com/",
+    "prefetch": {"url": "https://www.vivino.com/", "method": "GET"},
+    "request_method": "POST", "urlProbe": "https://www.vivino.com/api/login",
+    "request_payload": {"email": "{}", "password": "password123"},
+    "errorMsg": ["The supplied email does not exist"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "X-Requested-With": "XMLHttpRequest", "Referer": "https://www.vivino.com/"}
+  },
+  "Facebook": {
+    "__comment__": "user-scanner email_scan/social/facebook.py. Prefetch for LSD+jazoest; identify.php recover; 'These accounts matched'/redirectPageTo=registered, 'No search results'=available. Heavily bot-protected; best-effort, VERIFY LIVE.",
+    "category": "social", "loud": false, "errorType": "message",
+    "url": "https://facebook.com", "urlMain": "https://www.facebook.com/",
+    "prefetch": {"url": "https://www.facebook.com/?_rdr=", "method": "GET", "capture": {"lsd": {"regex": "\\[\"LSD\",\\[\\],\\{\"token\":\"([^\"]+)\""}, "jazoest": {"regex": "jazoest=(\\d+)"}}},
+    "request_method": "POST", "urlProbe": "https://www.facebook.com/ajax/login/help/identify.php?ctx=recover",
+    "request_form": {"jazoest": "{jazoest}", "lsd": "{lsd}", "email": "{}", "did_submit": "1", "__user": "0", "__a": "1", "__req": "7"},
+    "existsMsg": ["These accounts matched your search", "redirectPageTo"], "errorMsg": ["No search results", "Your search did not return any results."],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-fb-lsd": "{lsd}", "x-asbd-id": "359341", "Origin": "https://www.facebook.com", "Referer": "https://www.facebook.com/login/identify/?ctx=recover"}
+  },
+  "Classmates": {
+    "__comment__": "user-scanner email_scan/social/classmates.py. LOGIN-PROBE. Prefetch /auth/login for _csrf; POST; 'invalid registration/password'=registered, 'did not find an account'=available. VERIFY LIVE.",
+    "category": "social", "loud": false, "errorType": "message",
+    "url": "https://www.classmates.com", "urlMain": "https://www.classmates.com/",
+    "prefetch": {"url": "https://www.classmates.com/auth/login", "method": "GET", "capture": {"csrf": {"regex": "name=\"_csrf\" value=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://www.classmates.com/auth/login",
+    "request_form": {"_csrf": "{csrf}", "successUrl": "", "emailOrRegId": "{}", "password": "SafetyMismatch_123!", "rememberme": "no"},
+    "existsMsg": ["invalid registration/password"], "errorMsg": ["did not find an account for the email address"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://www.classmates.com", "Referer": "https://www.classmates.com/auth/login"}
+  },
+  "Mastodon": {
+    "__comment__": "user-scanner email_scan/social/mastodon.py. Prefetch /auth/sign_up for csrf; POST /auth; 'has already been taken'=registered. VERIFY LIVE.",
+    "category": "social", "loud": false, "errorType": "message",
+    "url": "https://mastodon.social", "urlMain": "https://mastodon.social/",
+    "prefetch": {"url": "https://mastodon.social/auth/sign_up", "method": "GET", "capture": {"token": {"regex": "name=\"csrf-token\" content=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://mastodon.social/auth",
+    "request_form": {"authenticity_token": "{token}", "user[account_attributes][username]": "no3motions_robot_020102", "user[email]": "{}", "user[password]": "Theleftalone@me", "user[password_confirmation]": "Theleftalone@me", "user[agreement]": "1", "button": ""},
+    "existsMsg": ["has already been taken"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://mastodon.social", "Referer": "https://mastodon.social/explore"}
+  },
+  "Pinterest": {
+    "__comment__": "user-scanner email_scan/social/pinterest.py. register/exists via ApiResource; resource_response.data true=registered. JSON-in-query pre-encoded; VERIFY LIVE.",
+    "category": "social", "loud": false, "errorType": "message",
+    "url": "https://pinterest.com", "urlMain": "https://www.pinterest.com/",
+    "urlProbe": "https://www.pinterest.com/resource/ApiResource/get/?source_url=%2Fsignup%2Fstep1%2F&data=%7B%22options%22%3A%7B%22url%22%3A%22%2Fv3%2Fregister%2Fexists%2F%22%2C%22data%22%3A%7B%22email%22%3A%22{}%22%7D%7D%2C%22context%22%3A%7B%7D%7D",
+    "request_method": "GET",
+    "existsMsg": ["\"data\":true", "\"data\": true"], "errorMsg": ["\"data\":false", "\"data\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*", "x-requested-with": "XMLHttpRequest", "x-pinterest-source-url": "/signup/step1/", "origin": "https://www.pinterest.com", "referer": "https://www.pinterest.com/"}
+  },
+  "Plurk": {
+    "__comment__": "user-scanner email_scan/social/plurk.py. isEmailFound; body 'True'=registered, 'False'=available. VERIFY LIVE.",
+    "category": "social", "loud": false, "errorType": "message",
+    "url": "https://www.plurk.com", "urlMain": "https://www.plurk.com/",
+    "urlProbe": "https://www.plurk.com/Users/isEmailFound",
+    "request_method": "POST", "request_form": {"email": "{}"},
+    "existsMsg": ["True"], "errorMsg": ["False"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "*/*", "X-Requested-With": "XMLHttpRequest", "Origin": "https://www.plurk.com"}
+  },
+  "MeWe": {
+    "__comment__": "user-scanner email_scan/social/mewe.py. check/user/email; exists:true=registered. VERIFY LIVE.",
+    "category": "social", "loud": false, "errorType": "message",
+    "url": "https://mewe.com", "urlMain": "https://mewe.com/",
+    "urlProbe": "https://mewe.com/api/v2/auth/check/user/email",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["\"exists\":true", "\"exists\": true"], "errorMsg": ["\"exists\":false", "\"exists\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://mewe.com", "Referer": "https://mewe.com/register"}
+  },
+  "X (Twitter)": {
+    "__comment__": "user-scanner email_scan/social/x.py. email_available.json; taken:true=registered, false=available. VERIFY LIVE.",
+    "category": "social", "loud": false, "errorType": "message",
+    "url": "https://x.com", "urlMain": "https://x.com/",
+    "urlProbe": "https://api.x.com/i/users/email_available.json?email={}",
+    "request_method": "GET",
+    "existsMsg": ["\"taken\":true", "\"taken\": true"], "errorMsg": ["\"taken\":false", "\"taken\": false"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-twitter-client-language": "en", "x-twitter-active-user": "yes", "origin": "https://x.com"}
+  },
+  "ESPN": {
+    "__comment__": "user-scanner email_scan/sports/espn.py. Disney guest-flow; LOGIN_FLOW=registered, REGISTRATION_FLOW=available. VERIFY LIVE.",
+    "category": "sports", "loud": false, "errorType": "message",
+    "url": "https://espn.com", "urlMain": "https://www.espn.com/",
+    "urlProbe": "https://registerdisney.go.com/jgc/v8/client/ESPN-ONESITE.WEB-PROD/guest-flow?langPref=en&feature=no-password-reuse",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["LOGIN_FLOW"], "errorMsg": ["REGISTRATION_FLOW"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"origin": "https://cdn.registerdisney.go.com", "referer": "https://cdn.registerdisney.go.com/"}
+  },
+  "NBA": {
+    "__comment__": "user-scanner email_scan/sports/nba.py. registrationStatus; isFull true=registered, Profile not found=available. VERIFY LIVE.",
+    "category": "sports", "loud": false, "errorType": "message",
+    "url": "https://www.nba.com", "urlMain": "https://www.nba.com/",
+    "urlProbe": "https://identity.nba.com/api/v1/profile/registrationStatus",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["\"isFull\":true", "\"isFull\": true"], "errorMsg": ["INVALID_PROFILE_STATUS", "Profile not found"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-client-platform": "web", "origin": "https://www.nba.com", "referer": "https://www.nba.com/"}
+  },
+  "BuyMeACoffee": {
+    "__comment__": "user-scanner email_scan/creator/buymeacoffee.py. LOUD: email/login OTP. otp_login true=registered, 'no account'=available. VERIFY LIVE.",
+    "category": "creator", "loud": true, "errorType": "message",
+    "url": "https://www.buymeacoffee.com", "urlMain": "https://www.buymeacoffee.com/",
+    "urlProbe": "https://app.buymeacoffee.com/api/v1/email/login",
+    "request_method": "POST", "request_payload": {"email": "{}", "client_response": "", "captcha_version": "v3"},
+    "existsMsg": ["\"otp_login\":true", "\"otp_login\": true"], "errorMsg": ["no account with the given", "no account"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"User-Agent": "BuyMeaCoffee-Android-1.4.90", "Accept": "application/json, text/plain, */*", "x-device-fingerprint": "scannerfingerprint00"}
+  },
+  "Marca": {
+    "__comment__": "user-scanner email_scan/sports/marca.py. comprobacion/{email}; status OK=registered, NOK=available. VERIFY LIVE.",
+    "category": "sports", "loud": false, "errorType": "message",
+    "url": "https://marca.com", "urlMain": "https://www.marca.com/",
+    "urlProbe": "https://seguro.marca.com/ueregistro/v2/usuarios/comprobacion/{}/2",
+    "request_method": "GET",
+    "existsMsg": ["\"status\":\"OK\"", "\"status\": \"OK\""], "errorMsg": ["\"status\":\"NOK\"", "\"status\": \"NOK\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://www.marca.com", "Referer": "https://www.marca.com/"}
+  },
+  "Adobe": {
+    "__comment__": "user-scanner email_scan/creator/adobe.py. signin accounts; password auth method present=registered, empty=available. VERIFY LIVE.",
+    "category": "creator", "loud": false, "errorType": "message",
+    "url": "https://adobe.com", "urlMain": "https://adobe.com/",
+    "urlProbe": "https://auth.services.adobe.com/signin/v2/users/accounts",
+    "request_method": "POST", "request_payload": {"username": "{}", "usernameType": "EMAIL"},
+    "existsMsg": ["\"id\":\"password\"", "\"id\": \"password\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "x-ims-clientid": "BehanceWebSusi1", "Origin": "https://auth.services.adobe.com", "Referer": "https://www.behance.net/"}
+  },
+  "Gumroad": {
+    "__comment__": "user-scanner email_scan/creator/gumroad.py. LOUD: forgot_password. Prefetch for csrf; 'An account does not exist'=available, else registered. VERIFY LIVE.",
+    "category": "creator", "loud": true, "errorType": "message",
+    "url": "https://gumroad.com", "urlMain": "https://gumroad.com/",
+    "prefetch": {"url": "https://gumroad.com/users/forgot_password/new", "method": "GET", "capture": {"token": {"regex": "name=\"csrf-token\" content=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://gumroad.com/users/forgot_password",
+    "request_payload": {"user": {"email": "{}"}},
+    "errorMsg": ["An account does not exist"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-csrf-token": "{token}", "x-inertia": "true", "X-Requested-With": "XMLHttpRequest", "Origin": "https://gumroad.com", "Referer": "https://gumroad.com/users/forgot_password/new"}
+  },
+  "Kick": {
+    "__comment__": "user-scanner email_scan/creator/kick.py. signup/verify/email; 204=available, 422 'already been taken'=registered. VERIFY LIVE.",
+    "category": "creator", "loud": false, "errorType": "message",
+    "url": "https://kick.com", "urlMain": "https://kick.com/",
+    "urlProbe": "https://kick.com/api/v1/signup/verify/email",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["already been taken"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"User-Agent": "KickMobile/40.18.1 (com.kick.mobile; platform: android; build:60006868)", "Accept": "application/json", "x-app-platform": "Android", "x-app-version": "40.18.1", "x-kick-app": "mobile"}
+  },
+  "Komoot": {
+    "__comment__": "user-scanner email_scan/travel/komoot.py. v1/signin; type login=registered, register=available. VERIFY LIVE.",
+    "category": "travel", "loud": false, "errorType": "message",
+    "url": "https://www.komoot.com", "urlMain": "https://www.komoot.com/",
+    "urlProbe": "https://www.komoot.com/v1/signin",
+    "request_method": "POST", "request_payload": {"email": "{}", "reason": "header", "new_tab": false},
+    "existsMsg": ["\"type\":\"login\"", "\"type\": \"login\""], "errorMsg": ["\"type\":\"register\"", "\"type\": \"register\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://www.komoot.com", "Referer": "https://www.komoot.com/signin?reason=header"}
+  },
+  "Flickr": {
+    "__comment__": "user-scanner email_scan/creator/flickr.py. AWS Cognito SignUp (dummy password); 'An account with the given email already exists'=registered. VERIFY LIVE.",
+    "category": "creator", "loud": false, "errorType": "message",
+    "url": "https://flickr.com", "urlMain": "https://flickr.com/",
+    "urlProbe": "https://cognito-idp.us-east-1.amazonaws.com",
+    "request_method": "POST",
+    "request_payload": {"ClientId": "3ck15a1ov4f0d3o97vs3tbjb52", "Username": "{}", "Password": "You#are-a-n80", "UserAttributes": [{"Name": "email", "Value": "{}"}, {"Name": "birthdate", "Value": "1983-02-05"}, {"Name": "given_name", "Value": "John"}, {"Name": "family_name", "Value": "Doe"}, {"Name": "locale", "Value": "en-us"}], "ValidationData": [{"Name": "recaptchaToken", "Value": "Not-required"}], "ClientMetadata": {"referrerUrl": ""}},
+    "existsMsg": ["An account with the given email already exists"], "errorMsg": ["PreSignUp failed with error Sign Up failure"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"x-amz-target": "AWSCognitoIdentityProviderService.SignUp", "Content-Type": "application/x-amz-json-1.1", "origin": "https://identity.flickr.com", "referer": "https://identity.flickr.com/sign-up"}
+  },
+  "Emirates": {
+    "__comment__": "user-scanner email_scan/travel/emirates.py. validate-email; EmailExistsForAnotherMember=registered, else available. VERIFY LIVE.",
+    "category": "travel", "loud": false, "errorType": "message",
+    "url": "https://emirates.com", "urlMain": "https://www.emirates.com/",
+    "urlProbe": "https://www.emirates.com/service/ekl/validate-email?data=null",
+    "request_method": "POST", "request_payload": {"emailAddress": "{}"},
+    "existsMsg": ["EmailExistsForAnotherMember"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "origin": "https://www.emirates.com"}
+  },
+  "Polarsteps": {
+    "__comment__": "user-scanner email_scan/travel/polarsteps.py. LOUD. validation/unique; 'INVALID'=registered, 'OK'=available. VERIFY LIVE.",
+    "category": "travel", "loud": true, "errorType": "message",
+    "url": "https://polarsteps.com", "urlMain": "https://www.polarsteps.com/",
+    "urlProbe": "https://www.polarsteps.com/validation/unique",
+    "request_method": "POST", "request_form": {"field": "users.email", "value": "{}"},
+    "existsMsg": ["INVALID", "invalid"], "errorMsg": ["OK", "ok"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"User-Agent": "Polarsteps/8.0.0 (com.polarsteps; build:2000006379; Android 10)", "polarsteps-api-version": "55", "polarsteps-user-language": "en-US"}
+  },
+  "PornHub": {
+    "__comment__": "user-scanner email_scan/adult/pornhub.py. Prefetch landing for token; create_account_check; 'already registered'=registered. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://pornhub.com", "urlMain": "https://www.pornhub.com/",
+    "prefetch": {"url": "https://www.pornhub.com", "method": "GET", "capture": {"token": {"regex": "var\\s+token\\s*=\\s*\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://www.pornhub.com/api/v1/user/create_account_check?token={token}",
+    "request_form": {"check_what": "email", "email": "{}"},
+    "existsMsg": ["already registered"], "errorMsg": ["create_account_passed"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"X-Requested-With": "XMLHttpRequest", "origin": "https://www.pornhub.com", "referer": "https://www.pornhub.com/"}
+  },
+  "XNXX": {
+    "__comment__": "user-scanner email_scan/adult/xnxx.py. account/checkemail; result:false=registered, true=available (inverted). VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://xnxx.com", "urlMain": "https://www.xnxx.com/",
+    "urlProbe": "https://www.xnxx.com/account/checkemail?email={}",
+    "request_method": "GET",
+    "existsMsg": ["\"result\":false", "\"result\": false"], "errorMsg": ["\"result\":true", "\"result\": true"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Referer": "https://www.xnxx.com/"}
+  },
+  "XVideos": {
+    "__comment__": "user-scanner email_scan/adult/xvideos.py. account/checkemail; result:false=registered, true=available (inverted). VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://xvideos.com", "urlMain": "https://www.xvideos.com/",
+    "urlProbe": "https://www.xvideos.com/account/checkemail?email={}",
+    "request_method": "GET",
+    "existsMsg": ["\"result\":false", "\"result\": false"], "errorMsg": ["\"result\":true", "\"result\": true"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Referer": "https://www.xvideos.com/"}
+  },
+  "SexVid": {
+    "__comment__": "user-scanner email_scan/adult/sexvid.py. LOUD: reset-password emails a new password. success=registered, doesnt_exist=available. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": true, "errorType": "message",
+    "url": "https://sexvid.pro", "urlMain": "https://www.sexvid.pro/",
+    "urlProbe": "https://www.sexvid.pro/reset-password/",
+    "request_method": "POST", "request_form": {"action": "restore_password", "mode": "async", "format": "json", "email_link": "https://www.sexvid.pro/signup.php", "email": "{}", "code": "xxxxx"},
+    "existsMsg": ["A new generated password has been sent", "\"status\":\"success\""], "errorMsg": ["doesnt_exist", "No user with such email exists"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "*/*", "X-Requested-With": "XMLHttpRequest", "Origin": "https://www.sexvid.pro", "Referer": "https://www.sexvid.pro/reset-password/"}
+  },
+  "FlirtBate": {
+    "__comment__": "user-scanner email_scan/adult/flirtbate.py. LOUD: reset-password-email. 'Reset password email sent'=registered, 'Email invalid'=available. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": true, "errorType": "message",
+    "url": "https://flirtbate.com", "urlMain": "https://flirtbate.com/",
+    "urlProbe": "https://api.flirtbate.com/api/v1/customer/reset-password-email",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["Reset password email sent"], "errorMsg": ["Email invalid for reset password"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "origin": "https://flirtbate.com", "referer": "https://flirtbate.com/"}
+  },
+  "SuperPorn": {
+    "__comment__": "user-scanner email_scan/adult/superporn.py. signup/check-email; 'Email is in use'=registered, result ok=available. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://superporn.com", "urlMain": "https://www.superporn.com/",
+    "urlProbe": "https://api.superporn.com/signup/check-email",
+    "request_method": "POST", "request_form": {"lang": "en_US", "email": "{}"},
+    "existsMsg": ["Email is in use"], "errorMsg": ["\"result\":\"ok\"", "\"result\": \"ok\""],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "Origin": "https://www.superporn.com", "Referer": "https://www.superporn.com/signup"}
+  },
+  "Babestation": {
+    "__comment__": "user-scanner email_scan/adult/babestation.py. LOUD: username-reminder emails the target. success true=registered, 'Email not found'=available. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": true, "errorType": "message",
+    "url": "https://babestation.tv", "urlMain": "https://www.babestation.tv/",
+    "urlProbe": "https://www.babestation.tv/user/send/username-reminder",
+    "request_method": "POST", "request_payload": {"email": "{}"},
+    "existsMsg": ["\"success\":true", "\"success\": true"], "errorMsg": ["Email not found"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "x-requested-with": "XMLHttpRequest", "origin": "https://www.babestation.tv", "referer": "https://www.babestation.tv/forgot-password-or-username"}
+  },
+  "FapFolder": {
+    "__comment__": "user-scanner email_scan/adult/fapfolder.py. signup; 'belongs to an existing account'=registered. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://fapfolder.club", "urlMain": "https://fapfolder.club/",
+    "urlProbe": "https://fapfolder.club/includes/ajax/core/signup.php",
+    "request_method": "POST", "request_form": {"username": "l0v3_d0n0t_3xist", "email": "{}", "email2": "{}", "password": "1", "field1": "", "privacy_agree": "on"},
+    "existsMsg": ["belongs to an existing account"], "errorMsg": ["password must be at least"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/javascript, */*; q=0.01", "x-requested-with": "XMLHttpRequest", "origin": "https://fapfolder.club", "referer": "https://fapfolder.club/signup"}
+  },
+  "LetsPorn": {
+    "__comment__": "user-scanner email_scan/adult/letsporn.py. signup; error code 'exists'/already exists=registered. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://letsporn.com", "urlMain": "https://letsporn.com/",
+    "urlProbe": "https://letsporn.com/?mode=async&function=get_block&block_id=signup_signup_form_simple&global=true",
+    "request_method": "POST", "request_form": {"format": "json", "mode": "async", "action": "signup", "email_link": "https://letsporn.com/email", "email": "{}", "username": "{}", "pass": "y0u_hav3_th3_s0wrd", "pass2": "but_n0t_th3_cr0wn"},
+    "existsMsg": ["\"code\":\"exists\"", "already exists", "already in use"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "X-Requested-With": "XMLHttpRequest", "Origin": "https://letsporn.com", "Referer": "https://letsporn.com/categories/lesbian"}
+  },
+  "Lovescape": {
+    "__comment__": "user-scanner email_scan/adult/lovescape.py. signup; 'Email is already used'=registered, 'Username is already used'=available. Payload trimmed. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://lovescape.com", "urlMain": "https://lovescape.com/",
+    "urlProbe": "https://lovescape.com/api/front/auth/signup",
+    "request_method": "POST", "request_payload": {"username": "_W3ak3n3d_Cut3n3ss86541", "email": "{}", "password": "igy8868yiyy", "recaptcha": "", "source": "page_signup", "locale": "en", "authType": "native"},
+    "existsMsg": ["Email is already used"], "errorMsg": ["Username is already used"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json", "Content-Type": "text/plain;charset=UTF-8", "Origin": "https://lovescape.com", "Referer": "https://lovescape.com/signup"}
+  },
+  "Made.porn": {
+    "__comment__": "user-scanner email_scan/adult/made_porn.py. LOUD: change-password. 'sent an email with a link'=registered, 'email address is incorrect'=available. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": true, "errorType": "message",
+    "url": "https://made.porn", "urlMain": "https://made.porn/",
+    "urlProbe": "https://made.porn/endpoint/api/json/change-password",
+    "request_method": "POST", "request_form": {"email": "{}"},
+    "existsMsg": ["sent an email with a link"], "errorMsg": ["The email address is incorrect"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://made.porn", "Referer": "https://made.porn/login"}
+  },
+  "TheGay": {
+    "__comment__": "user-scanner email_scan/adult/thegay.py. signup; eml_occupied=registered, tok_required=available. VERIFY LIVE.",
+    "category": "adult", "isNSFW": true, "loud": false, "errorType": "message",
+    "url": "https://thegay.com", "urlMain": "https://thegay.com/",
+    "urlProbe": "https://thegay.com/api/signup.php",
+    "request_method": "POST", "request_form": {"act": "signup", "usr": "th3_knight_l0st", "eml": "{}", "pwd": "youAr3Al0n3"},
+    "existsMsg": ["eml_occupied"], "errorMsg": ["tok_required"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Accept": "application/json, text/plain, */*", "Origin": "https://thegay.com", "Referer": "https://thegay.com/signup/"}
+  },
+  "GirlsLife": {
+    "__comment__": "user-scanner email_scan/entertainment/girlslife.py. Prefetch /register for _wpnonce; POST; 'The email you entered is incorrect'=registered, 'Password is required'=available. Form field id may change. VERIFY LIVE.",
+    "category": "entertainment", "loud": false, "errorType": "message",
+    "url": "https://girlslife.com", "urlMain": "https://girlslife.com/",
+    "prefetch": {"url": "https://girlslife.com/register/", "method": "GET", "capture": {"nonce": {"regex": "name=\"_wpnonce\" value=\"([^\"]+)\""}}},
+    "request_method": "POST", "urlProbe": "https://girlslife.com/register/",
+    "request_form": {"user_email-291233": "{}", "user_password-291233": "", "confirm_user_password-291233": "", "birth_date-291233": "", "streetaddress-291233": "Miami-1", "zip_code-291233": "6281", "form_id": "291233", "um_request": "", "_wpnonce": "{nonce}", "_wp_http_referer": "/register/"},
+    "existsMsg": ["The email you entered is incorrect"], "errorMsg": ["Password is required"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Origin": "https://girlslife.com", "Referer": "https://girlslife.com/register/"}
+  },
+  "Global Times": {
+    "__comment__": "user-scanner email_scan/news/globaltimes.py. LOGIN-PROBE: api/user/login (dummy pw). 'password is incorrect'/lock=registered, \"don't recognize this account\"=available. VERIFY LIVE.",
+    "category": "news", "loud": false, "errorType": "message",
+    "url": "https://globaltimes.cn", "urlMain": "https://www.globaltimes.cn/",
+    "urlProbe": "https://enapp.globaltimes.cn/api/user/login",
+    "request_method": "POST", "request_payload": {"mail": "{}", "password": "21A5F558F45BE7FEA45A47EF4CAEC71B", "sensorsDistinctId": "", "sensorsAnonymousId": ""},
+    "existsMsg": ["password is incorrect", "account will be locked", "number of retries has reached the maximum"], "errorMsg": ["don't recognize this account"],
+    "regexCheck": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "username_claimed": "",
+    "headers": {"Token": "null", "Vcode": "232", "Origin": "https://enapp.globaltimes.cn", "Referer": "https://enapp.globaltimes.cn/web/login"}
+  }
+}

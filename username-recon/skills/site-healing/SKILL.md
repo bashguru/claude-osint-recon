@@ -56,7 +56,14 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/username-search/scripts/hunt.py" verify --
 
 # Machine-readable, for triage at scale:
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/username-search/scripts/hunt.py" verify --all --format json
+
+# Email sites use the same verifier with --email (against data/email_data.json):
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/username-search/scripts/hunt.py" verify --email --site "GitHub"
 ```
+
+Email verification needs a known-registered email in the entry's
+`username_claimed`; the engine compares it against a random non-existent email,
+exactly as it does for usernames.
 
 After a real search returns surprising results, verify the specific sites in
 question first. It's fast and tells you whether the problem is the site or the
@@ -81,19 +88,25 @@ username.
    **known-existing** profile and a **random missing** one. Compare status codes
    and bodies. (If a bot challenge appears, hand off to the analyst and don't bypass.)
 2. Decide the correct detection method and edit the site's entry in
-   `${CLAUDE_PLUGIN_ROOT}/skills/username-search/data/data.json`:
+   `${CLAUDE_PLUGIN_ROOT}/skills/username-search/data/data.json` (or
+   `data/email_data.json` for an email site):
    - Status differs (e.g. 200 vs 404) → `errorType: "status_code"` (add the
      missing code to `errorCode` if it answers 200-with-a-404-page).
    - Same status, different body → `errorType: "message"` and set `errorMsg` to a
      stable substring unique to the missing page (prefer a `<title>` or error
      container; avoid generic boilerplate).
-   - Missing profile redirects away → `errorType: "response_url"`.
+   - **Site now 200s everything** → add a positive marker `existsMsg` (a substring
+     present only on a real profile, often the handle, `{}`-interpolated). This is
+     usually the right fix for a `false_positive`.
+   - Missing profile redirects away → `errorType: "response_url"`, and set
+     `errorUrl` to the missing-user destination so the final URL is compared.
    - Update `url`/`urlProbe` if the path moved; add `headers`/`urlProbe` if a WAF
-     is the problem.
+     is the problem. Note that 401/403/406/429/503 now report `waf` (unknown), so a
+     block no longer masquerades as a false negative.
    See `${CLAUDE_PLUGIN_ROOT}/skills/username-search/references/tradecraft.md` for
    the full field schema and worked examples.
-3. Re-verify the single site until it reports `healthy`:
-   `... hunt.py verify --site "Repaired Site"`.
+3. Re-verify the single site until it reports `healthy`
+   (`... hunt.py verify --site "Repaired Site"`, add `--email` for an email site).
 4. Confirm the JSON still parses (a healthy `verify`/`list` run proves this).
 
 ## Refresh from upstream

@@ -110,12 +110,25 @@ random string), as an anonymous visitor, compare the two profile URLs:
 - **Same status, different body** → `errorType: "message"`. Choose a **stable
   substring** unique to the *missing* page for `errorMsg`. Prefer something in a
   `<title>` or an error container; avoid boilerplate that appears on every page.
-- **Missing user redirects away** (to home/login) → `errorType: "response_url"`.
+- **Missing user redirects away** (to home/login) → `errorType: "response_url"`,
+  and record the missing-user destination in `errorUrl` so detection compares the
+  final URL (more reliable than status alone).
 
-Watch for traps: a site that 200s every URL (needs `message`), soft-404s, WAF
-challenge pages (handle per below, not a real negative), and username format
-rules (set `regexCheck`). Capture a screenshot of both the real and missing pages
-as backup evidence.
+Two stronger signals are available (see the schema in `tradecraft.md`):
+
+- **Positive marker (`existsMsg`).** When the real and missing pages share a
+  status and look similar, set `existsMsg` to a substring that appears **only on a
+  real profile**, often the handle itself (`{}`-interpolated, e.g.
+  `profile:username" content="{}"`). This beats a negative-only rule on sites that
+  return 200 for everything.
+- **Ambiguous statuses** (401/403/406/429/503) are reported as `waf` (unknown), not
+  not-found, so you do not need to encode them as negatives. If a site genuinely
+  uses one to mark absence, list it in `errorCode`.
+
+Watch for traps: a site that 200s every URL (prefer `existsMsg`, or `message`),
+soft-404s, WAF challenge pages (handled as `waf`, not a real negative), and
+username format rules (set `regexCheck`). Capture a screenshot of both the real and
+missing pages as backup evidence.
 
 ## Step 4. Propose the manifest entry
 
@@ -159,8 +172,37 @@ run's bot policy (assisted = the analyst solves it in their own browser; automat
 **close each tab after you've captured what you need**; if a tab is closed, just
 re-navigate (state isn't kept in the tab).
 
+## Onboarding an email site (email mode)
+
+The same method onboards a site for the **email-search** path. The differences:
+
+1. **Candidacy** is a public, unauthenticated **signup or validation endpoint**
+   that reveals whether an email is already in use (so a signup form can say "email
+   taken"). No login, never submit a password. If the only way to tell is by
+   completing a signup or triggering a reset email, it is **loud**, mark it
+   `"loud": true` so it is skipped unless the analyst opts in.
+2. **Oracle** is a throwaway **email** you control that is registered on the site
+   (store it the same way; set it as `username_claimed`). The random comparison
+   uses a random non-existent email.
+3. **Derive** the rule logged out: capture a known-registered vs a random email
+   response and pick `existsMsg`/`errorMsg` substrings (these endpoints usually
+   return JSON, so a substring like `"email_is_taken"` or `null` works). If the
+   endpoint needs a CSRF token or cookie first, add a `prefetch` block with a
+   `capture` regex, and reference it as `{token}` in `request_form`/`headers`.
+   Many email rules also harvest profile fields into `extra` (see `tradecraft.md`
+   and the seed entries in `data/email_data.json` for the exact shape).
+4. **Write** the entry to `${CLAUDE_PLUGIN_ROOT}/skills/username-search/data/email_data.json`
+   (not the username manifest).
+5. **Verify** with the email mode of the same engine:
+   `hunt.py verify --email --site "Example"` (set `username_claimed` to your known
+   email first). A correct entry reports `healthy`.
+
+Everything else (preflight, candidacy discipline, the throwaway-oracle and
+credential-safety rules, bot-challenge policy) is identical. The detection schema
+is the same one in `tradecraft.md`; do not invent a second format.
+
 ## When done
 
 Tell the analyst the site is added and verified, note the detection method you
-chose, and remind them they can re-run a search (now covering the new site) or
-build an evidence report.
+chose (and whether it is a username or email site), and remind them they can re-run
+a search (now covering the new site) or build an evidence report.

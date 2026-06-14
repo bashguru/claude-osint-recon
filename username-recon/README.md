@@ -1,27 +1,37 @@
 # username-recon
 
-OSINT **username enumeration** as a Claude plugin. Find where a username exists
-across hundreds of public websites, **verify each hit in a real browser, and
-capture court-ready screenshot evidence**, plus a **self-healing** capability
-that keeps the detection accurate as those sites change.
+OSINT **identity enumeration** as a Claude plugin. Find where a **username or an
+email** exists across hundreds of public websites, **verify each hit in a real
+browser, and capture court-ready screenshot evidence**, with a **self-healing**
+capability that keeps detection accurate as sites change, and an optional
+**infostealer-leak** check.
 
 It is a clean-room, dependency-free re-implementation of the
-[Sherlock](https://github.com/sherlock-project/sherlock) tradecraft for the fast
-triage step, wrapped in a browser-first evidence workflow built for OSINT analysts
-(including non-technical ones).
+[Sherlock](https://github.com/sherlock-project/sherlock) username tradecraft,
+extended with email and infostealer tradecraft informed by the
+[user-scanner](https://github.com/kaifcodec/user-scanner) project, all wrapped in a
+browser-first evidence workflow built for OSINT analysts (including non-technical
+ones).
 
 ## What it does
 
-1. **Triage** a username across ~481 sites with a dependency-free engine
+1. **Triage by username** across ~481 sites with a dependency-free engine
    (`hunt.py`) to get the short list of likely accounts.
-2. **Verify in a real browser** (via an MCP, the Browser MCP extension or
+2. **Triage by email** across public signup/validation endpoints to find where an
+   email is registered (logged out, no password ever submitted).
+3. **Verify in a real browser** (via an MCP, the Browser MCP extension or
    Playwright), so results reflect what a human actually sees, and **capture a
    screenshot** of each confirmed profile.
-3. **Report.** Assemble the findings into a single, self-contained, court-ready
+4. **Report.** Assemble the findings into a single, self-contained, court-ready
    **HTML evidence report** with embedded screenshots, full URLs, UTC capture times,
    and a SHA-256 hash per screenshot.
+5. **Combined recon and infostealer (optional).** Investigate a username and email
+   together in one pass, and optionally check either against Hudson Rock's
+   infostealer-log API (third-party, only with your consent).
 
-The Claude sandbox is the **last** resort, not the default (see Execution tiers).
+Triage runs on the **analyst's machine**; the Claude sandbox cannot reach the sites
+(its network egress is blocked), so it is a degraded last resort only (see Execution
+tiers).
 
 ## Execution tiers (browser-first)
 
@@ -43,13 +53,16 @@ capture; closing a tab never loses progress (state lives in the case file).
 | Component | Purpose |
 | --- | --- |
 | Skill: **preflight** | Check all prerequisites (browser MCP, local execution for triage, Python) and walk a non-technical analyst through setting up anything missing. Runs first. |
-| Skill: **username-search** | Triage, browser-verify, capture evidence, choose output, interpret results. |
+| Skill: **username-search** | Triage by username, browser-verify, capture evidence, choose output, interpret results. |
+| Skill: **email-search** | Triage by email against public signup/validation endpoints (logged out); same verify + evidence flow. Loud (notifying) sites skipped by default. |
+| Skill: **recon** | Combined investigation: runs username-search and email-search together, cross-references them, optional infostealer, one report. Orchestration only. |
 | Skill: **evidence-report** | Capture protocol + build the court-ready HTML report. |
-| Skill: **site-healing** | Diagnose false positives/negatives and repair the manifest. |
-| Skill: **add-site** | Assess whether a new site is a valid candidate, derive its detection rule (logged-out, using a throwaway account as the oracle), verify it, and store the throwaway oracle credentials locally for reuse. |
-| Engine: `hunt.py` | Dependency-free triage CLI: `search`, `verify`, `update`, `list`. |
+| Skill: **site-healing** | Diagnose false positives/negatives and repair the manifest (username or email). |
+| Skill: **add-site** | Assess whether a new site is a valid candidate, derive its detection rule (logged-out, using a throwaway account/email as the oracle), verify it, and store the throwaway oracle credentials locally for reuse. |
+| Engine: `hunt.py` | Dependency-free CLI: `search`, `email`, `infostealer`, `verify` (`--email`), `update`, `list`. Shared request strategy (modern UA + headers, retries, optional `--rotate-ua`/`--delay`/`--proxy-file`) and one classifier. |
 | Generator: `build_report.py` | Dependency-free: turns findings + screenshots into one self-contained HTML report. |
-| Manifest: `data/data.json` | Community-maintained site list (snapshot bundled; `update` fetches latest). |
+| Manifest: `data/data.json` | Community-maintained username site list (snapshot bundled; `update` fetches latest, preserving locally added sites). |
+| Manifest: `data/email_data.json` | ~98 email sites across 18 categories (ported from the MIT-licensed user-scanner; loud and NSFW sites flagged and off by default; grow with add-site). |
 | References | `tradecraft.md` (method, tiers, schema), `evidence-protocol.md` (capture + case-file schema), `setup.md` (plain-language prerequisites setup). |
 
 ## Setup / prerequisites
@@ -75,10 +88,11 @@ python3 "$CLAUDE_PLUGIN_ROOT/skills/username-search/scripts/hunt.py" update
 ## Usage
 
 Just ask Claude naturally, e.g. "find the username `johndoe` and capture
-evidence", "what accounts does this handle have", "build me the OSINT report",
-"verify the GitHub detection looks right", "can we add this site to the list".
-Claude runs preflight, triages, browser-verifies the hits, captures screenshots,
-and offers the report.
+evidence", "where is `jane@example.com` registered", "run a full recon on this
+username and email", "has this email shown up in malware leaks", "build me the OSINT
+report", "verify the GitHub detection looks right", "can we add this site to the
+list". Claude runs preflight, triages on your machine, browser-verifies the hits,
+captures screenshots, and offers the report.
 
 **At the end, you can ask for outputs** and Claude will remind you. Options:
 
@@ -86,13 +100,16 @@ and offers the report.
 - **CSV / JSON** of findings to pivot on;
 - a **Word (.docx) or PDF** write-up.
 
-Direct CLI (triage only):
+Direct CLI (triage only; run on your machine):
 
 ```bash
 ROOT="$CLAUDE_PLUGIN_ROOT/skills/username-search/scripts/hunt.py"
-python3 "$ROOT" search johndoe --format json     # triage to a parseable list
-python3 "$ROOT" verify --site GitHub             # self-heal check
-python3 "$ROOT" list --names                     # show loaded sites
+python3 "$ROOT" search johndoe --format json            # username triage
+python3 "$ROOT" email jane@example.com --format json    # email triage (loud sites off)
+python3 "$ROOT" infostealer johndoe --confirm           # third-party leak check (asks consent)
+python3 "$ROOT" verify --site GitHub                    # self-heal check (add --email for email sites)
+python3 "$ROOT" search alice --permute "alice[0-9]{0-2}" # opt-in handle variations
+python3 "$ROOT" list --names                            # show loaded sites
 ```
 
 ## The evidence report

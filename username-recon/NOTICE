@@ -13,7 +13,19 @@ the MIT License.
   Copyright (c) Sherlock Project contributors
   Licensed under the MIT License.
 
-Use `hunt.py update` to refresh the manifest from the upstream community list.
+Use `hunt.py update` to refresh the username manifest from the upstream community list.
+
+The email-detection manifest (skills/username-search/data/email_data.json) and the
+infostealer-lookup integration are re-implemented in this plugin's own dependency-free
+engine, with detection logic (endpoints and markers) derived from the user-scanner
+project, which is distributed under the MIT License.
+
+  user-scanner, https://github.com/kaifcodec/user-scanner
+  Copyright (c) user-scanner contributors
+  Licensed under the MIT License.
+
+The infostealer check queries the Hudson Rock OSINT API; data is provided by Hudson
+Rock (https://www.hudsonrock.com) and that lookup is off unless explicitly requested.
 
 This plugin is intended for lawful, authorized use only, such as checking your own
 accounts, consented investigations, security research, and brand/impersonation

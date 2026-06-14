@@ -24,12 +24,16 @@ continue). Breadth runs on the concurrent triage engine; the browser only verifi
 the confirmed hits, one clean tab at a time. Closing a tab never loses progress
 (state lives in the case file).
 
-## Five skills inside
+## Seven skills inside
 
 - **preflight** checks all prerequisites (browser MCP, local execution for
   triage, Python) and helps a non-technical analyst set up anything missing. Runs
   first.
 - **username-search** runs triage → browser-verify → capture evidence → interpret.
+- **email-search** does the same by email address against ~98 public
+  signup/validation/login-check endpoints (loud and NSFW sites off by default).
+- **recon** orchestrates username + email together, plus an optional Hudson Rock
+  infostealer-leak check, into one evidence report (no detection logic of its own).
 - **evidence-report** is the capture protocol plus the builder for the self-contained HTML report.
 - **site-healing** tests detection with known-good/known-bad handles and repairs
   sites when they change.
