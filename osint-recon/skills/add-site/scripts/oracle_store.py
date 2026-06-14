@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-username-recon : oracle_store.py
+osint-recon : oracle_store.py
 ================================
 
 A tiny, dependency-free manager for **oracle credentials**, the throwaway test
@@ -75,7 +75,7 @@ def store_path(args):
 def guard_not_in_plugin(path):
     """Refuse to write the secret store inside a plugin tree (it could be shared)."""
     p = os.path.abspath(path)
-    if "username-recon" + os.sep + "skills" in p or os.sep + ".claude-plugin" in p:
+    if "osint-recon" + os.sep + "skills" in p or os.sep + ".claude-plugin" in p:
         raise SystemExit(
             "[!] Refusing to write the credential store inside the plugin tree:\n"
             f"    {p}\n"
@@ -121,7 +121,7 @@ def _ensure_gitignore(path):
         with open(gi, "a", encoding="utf-8") as fh:
             if existing and not existing.endswith("\n"):
                 fh.write("\n")
-            fh.write("# username-recon oracle credential store (never commit)\n")
+            fh.write("# osint-recon oracle credential store (never commit)\n")
             for e in sorted(entries):
                 fh.write(e + "\n")
 
@@ -212,7 +212,7 @@ def cmd_remove(args):
 def build_parser():
     p = argparse.ArgumentParser(
         prog="oracle_store.py",
-        description="Manage throwaway oracle credentials for username-recon (local, "
+        description="Manage throwaway oracle credentials for osint-recon (local, "
                     "never shared). Detection runs logged out; these are for "
                     "keeping a site's oracle alive and re-deriving indicators.",
     )

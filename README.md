@@ -7,9 +7,9 @@ real accounts in a web browser, takes a screenshot of each one, and assembles
 everything into a single, court-ready evidence report. It can also check, with your
 permission, whether an identity shows up in known infostealer-malware leaks.
 
-The plugin itself lives in the [`username-recon/`](username-recon/) folder. This page
+The plugin itself lives in the [`osint-recon/`](osint-recon/) folder. This page
 is the friendly guide. A shorter technical overview is in
-[`username-recon/README.md`](username-recon/README.md).
+[`osint-recon/README.md`](osint-recon/README.md).
 
 > **Use it lawfully.** This tool only looks at pages and signals that are already
 > public. It never logs into anyone's account, never uses a real password, and never
@@ -101,11 +101,11 @@ anything missing, one step at a time.
 
 ### Step 1. Install the plugin
 
-**In Cowork (easiest):** open the [`username-recon.plugin`](username-recon.plugin)
+**In Cowork (easiest):** open the [`osint-recon.plugin`](osint-recon.plugin)
 file in Claude and click **Save plugin / Install**. You can also manage it under
 **Settings → Capabilities**.
 
-**In Claude Code:** add the `username-recon/` folder as a plugin.
+**In Claude Code:** add the `osint-recon/` folder as a plugin.
 
 Then just say **"set up the tools"** and let Claude check the rest.
 
@@ -267,10 +267,10 @@ known-missing identifier and repairs the rule when it has drifted. This is the
 
 | Path | What it is |
 | --- | --- |
-| [`username-recon/`](username-recon/) | The plugin (skills, engine, site lists, docs). |
-| [`username-recon/README.md`](username-recon/README.md) | Technical overview. |
-| [`username-recon/HANDOFF.md`](username-recon/HANDOFF.md) | Quick reference for teammates. |
-| `username-recon.plugin` | The installable plugin bundle. |
+| [`osint-recon/`](osint-recon/) | The plugin (skills, engine, site lists, docs). |
+| [`osint-recon/README.md`](osint-recon/README.md) | Technical overview. |
+| [`osint-recon/HANDOFF.md`](osint-recon/HANDOFF.md) | Quick reference for teammates. |
+| `osint-recon.plugin` | The installable plugin bundle. |
 | `data.json` | The username site list (snapshot). |
 | `NOTICE` | Attribution and licensing. |
 
@@ -283,4 +283,4 @@ MIT. The username site list derives from the MIT-licensed
 infostealer detection is informed by the MIT-licensed
 [user-scanner](https://github.com/kaifcodec/user-scanner) project, and the leak check
 is powered by [Hudson Rock](https://www.hudsonrock.com). See
-[`username-recon/NOTICE`](username-recon/NOTICE) for details.
+[`osint-recon/NOTICE`](osint-recon/NOTICE) for details.

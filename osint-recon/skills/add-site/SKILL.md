@@ -2,8 +2,8 @@
 name: add-site
 description: >
   This skill should be used to evaluate whether a website can be added to the
-  username-recon site list and, if so, to derive its detection rule. Trigger on
-  phrases like "add this site to the list", "can we add X to username-recon", "is
+  osint-recon site list and, if so, to derive its detection rule. Trigger on
+  phrases like "add this site to the list", "can we add X to osint-recon", "is
   this page a good candidate", "onboard a site", "create a detection rule for
   this site", "teach the tool a new site", or when an analyst wants to grow
   coverage from a page they found. Determines candidacy (public per-username

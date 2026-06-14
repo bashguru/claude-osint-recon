@@ -25,7 +25,7 @@ lives only here.
   Plaintext-at-rest is acceptable for disposable accounts and *only* those.
 - **Lives outside the plugin tree.** Default `./oracle-credentials.json` in the
   analyst's project folder (or `$USERNAME_RECON_ORACLE_STORE`). The script refuses
-  to write inside the plugin, so it is never packaged into `username-recon.plugin`
+  to write inside the plugin, so it is never packaged into `osint-recon.plugin`
   or shared.
 - **Locked + ignored.** Written `chmod 600`; a sibling `.gitignore` is created
   automatically so it is never committed.

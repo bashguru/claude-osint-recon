@@ -1,6 +1,6 @@
 # Username-enumeration tradecraft & manifest schema
 
-This is the "how it actually works" reference for the username-recon engine.
+This is the "how it actually works" reference for the osint-recon engine.
 Read it when adding sites, repairing detection, or explaining the method.
 
 ## The core idea

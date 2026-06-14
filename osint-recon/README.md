@@ -1,4 +1,4 @@
-# username-recon
+# osint-recon
 
 OSINT **identity enumeration** as a Claude plugin. Find where a **username or an
 email** exists across hundreds of public websites, **verify each hit in a real

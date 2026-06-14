@@ -7,7 +7,7 @@ description: >
   "check prerequisites", "is everything ready", "set up the tools", "why can't you
   open the page", "the browser isn't working", "connect Browser MCP", "connect
   Desktop Commander", "run it on my machine", or automatically as step 0 of any
-  username-recon run. Checks three capabilities (a browser MCP for evidence, local
+  osint-recon run. Checks three capabilities (a browser MCP for evidence, local
   execution for fast triage via Desktop Commander or terminal, and Python 3.8+) and
   walks through configuring each.
 metadata:
@@ -17,7 +17,7 @@ metadata:
 
 # Preflight (check prerequisites & set up missing tools)
 
-Run this **first**, automatically, at the start of any username-recon run. It
+Run this **first**, automatically, at the start of any osint-recon run. It
 confirms the plugin can actually do its job on *this* machine, and if something is
 missing it explains setup in plain language (written for non-technical analysts).
 Never start a search before preflight passes for what that run needs.

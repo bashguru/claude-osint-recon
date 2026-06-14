@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-username-recon : build_report.py
+osint-recon : build_report.py
 ================================
 
 Turn a set of OSINT findings + screenshot evidence into a single, self-contained,
@@ -471,7 +471,7 @@ JS = r"""
     var cid=(window.CASE&&CASE.case_id)||'';
     var msg='Here are '+fs.length+' relevant OSINT evidence findings for '+subj
           +(cid?(' (case '+cid+')'):'')+'. Please build an evidence summary from them '
-          +'(or a new report). This JSON uses the username-recon case-file schema:\n\n'
+          +'(or a new report). This JSON uses the osint-recon case-file schema:\n\n'
           +'```json\n'+caseJSON()+'\n```';
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(msg).then(function(){ flash('copyclaude','Copied ✓'); },
@@ -636,7 +636,7 @@ def render_report(case, enriched):
     parts.append('<html lang="en"><head><meta charset="utf-8">')
     parts.append('<meta name="viewport" content="width=device-width, initial-scale=1">')
     parts.append(f'<title>{esc(title)}</title>')
-    parts.append('<meta name="generator" content="username-recon evidence-report ' + SCHEMA_VERSION + '">')
+    parts.append('<meta name="generator" content="osint-recon evidence-report ' + SCHEMA_VERSION + '">')
     parts.append(f"<style>{CSS}</style></head><body><div class='wrap'>")
 
     # Header

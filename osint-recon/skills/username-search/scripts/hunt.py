@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-username-recon : hunt.py
+osint-recon : hunt.py
 ========================
 
 A dependency-free re-implementation of the Sherlock "username enumeration"

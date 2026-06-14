@@ -1,5 +1,5 @@
 {
-  "name": "username-recon",
+  "name": "osint-recon",
   "version": "0.6.0",
   "description": "OSINT identity enumeration across hundreds of public sites by username or email, with a browser-first workflow that verifies accounts in a real browser, captures court-ready screenshot evidence, and builds a self-contained HTML report. Includes self-healing detection, an optional infostealer-leak check, and a combined recon workflow.",
   "author": {

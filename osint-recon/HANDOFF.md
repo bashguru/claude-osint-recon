@@ -1,4 +1,4 @@
-# username-recon (team handoff)
+# osint-recon (team handoff)
 
 **What it is.** A Claude plugin for OSINT username enumeration with a
 **browser-first evidence workflow**. Give it a handle and it triages ~481 public
@@ -42,14 +42,14 @@ the confirmed hits, one clean tab at a time. Closing a tab never loses progress
 
 ## Run it (three ways)
 
-- **Cowork (easiest).** Open `username-recon.plugin` in Claude and install it (or
+- **Cowork (easiest).** Open `osint-recon.plugin` in Claude and install it (or
   Settings → Capabilities). Then ask in plain language, such as *"find the username johndoe
   and capture evidence"* or *"build me the report"*. **You can ask for outputs at the
   end**, whether an HTML report, CSV/JSON, or a Word/PDF write-up.
 - **Command line (triage only, no Claude needed).** Python 3.8+. From
   `skills/username-search/scripts/`, run `python3 hunt.py search johndoe --format json`,
   `python3 hunt.py update`, `python3 hunt.py verify --all`, `python3 hunt.py list`.
-- **Claude Code.** Add the `username-recon` folder as a plugin, then ask as above.
+- **Claude Code.** Add the `osint-recon` folder as a plugin, then ask as above.
 
 ## The evidence report
 
