@@ -36,6 +36,15 @@ is the friendly guide. A shorter technical overview is in
    optionally check an identity against infostealer-malware leak data (a third-party
    service, only when you say yes).
 
+### Three ways to search
+
+You investigate from whatever identity you have. Ask for one, the other, or both:
+
+- **Username only**: *"find the username jsmith"*
+- **Email only**: *"check where jsmith@example.com is registered"*
+- **Both together**: *"run a recon on the username jsmith and the email
+  jsmith@example.com"* (cross-references the two and produces a single report)
+
 ---
 
 ## What it actually checks, and what the answers mean
