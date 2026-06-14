@@ -1,24 +1,24 @@
-# username-recon — team handoff
+# username-recon (team handoff)
 
-**What it is:** a Claude plugin for OSINT username enumeration with a
+**What it is.** A Claude plugin for OSINT username enumeration with a
 **browser-first evidence workflow**. Give it a handle and it triages ~481 public
 sites for an account, **verifies the hits in a real browser, screenshots each one**,
 and builds a **court-ready HTML evidence report**. Built for OSINT analysts,
-including non-technical ones. Authorized/lawful use only: your own footprint,
+including non-technical ones. Authorized/lawful use only, meaning your own footprint,
 consented investigations, security research, brand/impersonation monitoring.
 
-## How it runs (execution tiers — sandbox is the last resort)
+## How it runs (execution tiers, sandbox is the last resort)
 
-1. **Browser MCP — primary.** A real browser does the verification and evidence:
-   the **Browser MCP extension** first (the analyst's own browser — fewer
-   challenges, inline screenshots, they keep their tabs), `playwright-mcp` as the
+1. **Browser MCP (primary).** A real browser does the verification and evidence.
+   The **Browser MCP extension** comes first (the analyst's own browser, with fewer
+   challenges, inline screenshots, and they keep their tabs), `playwright-mcp` as the
    fallback. Only tier that produces screenshots.
-2. **Local CLI — secondary.** `hunt.py` on the analyst's own machine for fast bulk
+2. **Local CLI (secondary).** `hunt.py` on the analyst's own machine for fast bulk
    triage (real IP → fewer blocks).
-3. **Claude sandbox — last resort.** `hunt.py` in-sandbox only when nothing else is
+3. **Claude sandbox (last resort).** `hunt.py` in-sandbox only when nothing else is
    available.
 
-Bot challenges are **never auto-bypassed** — per-run policy is **assisted** (the
+Bot challenges are **never auto-bypassed**. The per-run policy is **assisted** (the
 analyst solves it) or **automated** (screenshot the block as evidence and
 continue). Breadth runs on the concurrent triage engine; the browser only verifies
 the confirmed hits, one clean tab at a time. Closing a tab never loses progress
@@ -26,33 +26,33 @@ the confirmed hits, one clean tab at a time. Closing a tab never loses progress
 
 ## Five skills inside
 
-- **preflight** — checks all prerequisites (browser MCP, local execution for
+- **preflight** checks all prerequisites (browser MCP, local execution for
   triage, Python) and helps a non-technical analyst set up anything missing. Runs
   first.
-- **username-search** — triage → browser-verify → capture evidence → interpret.
-- **evidence-report** — capture protocol + builds the self-contained HTML report.
-- **site-healing** — tests detection with known-good/known-bad handles and repairs
+- **username-search** runs triage → browser-verify → capture evidence → interpret.
+- **evidence-report** is the capture protocol plus the builder for the self-contained HTML report.
+- **site-healing** tests detection with known-good/known-bad handles and repairs
   sites when they change.
-- **add-site** — assess a new site's candidacy and derive + verify a detection rule
+- **add-site** assesses a new site's candidacy and derives + verifies a detection rule
   (logged-out, using a throwaway account as the oracle).
 
 ## Run it (three ways)
 
-- **Cowork (easiest):** open `username-recon.plugin` in Claude and install it (or
-  Settings → Capabilities). Then ask in plain language: *"find the username johndoe
-  and capture evidence"*, *"build me the report"*. **You can ask for outputs at the
-  end** — HTML report, CSV/JSON, or a Word/PDF write-up.
-- **Command line (triage only, no Claude needed):** Python 3.8+. From
-  `skills/username-search/scripts/`: `python3 hunt.py search johndoe --format json`,
+- **Cowork (easiest).** Open `username-recon.plugin` in Claude and install it (or
+  Settings → Capabilities). Then ask in plain language, such as *"find the username johndoe
+  and capture evidence"* or *"build me the report"*. **You can ask for outputs at the
+  end**, whether an HTML report, CSV/JSON, or a Word/PDF write-up.
+- **Command line (triage only, no Claude needed).** Python 3.8+. From
+  `skills/username-search/scripts/`, run `python3 hunt.py search johndoe --format json`,
   `python3 hunt.py update`, `python3 hunt.py verify --all`, `python3 hunt.py list`.
-- **Claude Code:** add the `username-recon` folder as a plugin, then ask as above.
+- **Claude Code.** Add the `username-recon` folder as a plugin, then ask as above.
 
 ## The evidence report
 
 `skills/evidence-report/scripts/build_report.py` turns a case file (findings +
-screenshots) into **one** self-contained HTML file: embedded screenshots, full
+screenshots) into **one** self-contained HTML file with embedded screenshots, full
 URLs, UTC capture times, and a **SHA-256** per screenshot (re-verified in-browser).
-It's also interactive — tick the **relevant** evidence and **export the subset** as
+It's also interactive. Tick the **relevant** evidence and **export the subset** as
 CSV or as a JSON in the plugin's own case-file schema (a **"Copy for Claude"**
 button round-trips it straight back for a summary or a tighter report). Prints /
 exports to PDF cleanly.
@@ -73,7 +73,7 @@ exports to PDF cleanly.
 
 ## Notes
 
-- Public pages only — never logs in to detect, never bypasses authentication or bot
+- Public pages only. Never logs in to detect, never bypasses authentication or bot
   challenges. A `found` result is a lead, not proof of identity.
 - Detection rules are always built to work **logged out** (that's how the engine
   probes).

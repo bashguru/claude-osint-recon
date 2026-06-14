@@ -1,7 +1,7 @@
-# Setup guide — getting the prerequisites ready (plain-language)
+# Setup guide (getting the prerequisites ready, plain-language)
 
 The plugin needs a few capabilities to work well. You don't have to memorize any of
-this — tell Claude *"set up the tools"* and it will walk you through, one step at a
+this. Tell Claude *"set up the tools"* and it will walk you through, one step at a
 time, and check that each worked.
 
 ## What you need
@@ -20,25 +20,25 @@ You can set these up in any order. Claude re-checks after each.
 
 You only need **one** of these connected.
 
-### Option A — Browser MCP extension (recommended)
+### Option A. Browser MCP extension (recommended)
 
-A small extension that lets Claude drive **your** Chrome/Edge — your real browser,
+A small extension that lets Claude drive **your** Chrome/Edge, your real browser,
 with your logins. Sites challenge it less, screenshots come back cleanly, and you
 keep control of your tabs.
 
 1. Go to **https://browsermcp.io/install** and add the extension to Chrome/Edge.
 2. Make sure the matching connector is enabled in **Claude's settings → Connectors
    / Capabilities** (technical name `@browsermcp/mcp`).
-3. Click the **Browser MCP** toolbar icon and press **Connect** (people forget this
-   — it does nothing until you connect the tab).
+3. Click the **Browser MCP** toolbar icon and press **Connect** (people forget this;
+   it does nothing until you connect the tab).
 4. Leave that window open.
 
 *Worked when:* Claude says *"Browser ready (Browser MCP extension)."* If it says
 "not connected," click the icon and **Connect** again on a normal web page.
 
-### Option B — Playwright (fallback, self-contained browser)
+### Option B. Playwright (fallback, self-contained browser)
 
-A browser Claude runs by itself — use it if you can't install the extension. It's
+A browser Claude runs by itself. Use it if you can't install the extension. It's
 added in **Claude's settings → Connectors / Capabilities**; the technical detail:
 official Microsoft package **`@playwright/mcp`** (`npx @playwright/mcp@latest`),
 needs **Node.js 18+**, and should run **headed (visible)** so you can solve any
@@ -49,16 +49,16 @@ human-check. Official page: https://github.com/microsoft/playwright-mcp
 ## 2. Local execution (for fast triage)
 
 The triage engine checks hundreds of sites at once. It must run on **your**
-connection — Claude's sandbox is network-limited and will miss most sites. Two ways:
+connection; Claude's sandbox is network-limited and will miss most sites. Two ways:
 
-### Option A — Desktop Commander (recommended; Claude runs it for you)
+### Option A. Desktop Commander (recommended; Claude runs it for you)
 
 Desktop Commander lets Claude run commands on your computer (like the triage
-engine) using your real internet — so a full search finishes in seconds.
+engine) using your real internet, so a full search finishes in seconds.
 
 1. In **Claude's settings → Connectors / Capabilities**, enable / install
    **Desktop Commander**. (Technical: it's the `@wonderwhy-er/desktop-commander`
-   MCP server — can also be added with `npx @wonderwhy-er/desktop-commander setup`,
+   MCP server, which can also be added with `npx @wonderwhy-er/desktop-commander setup`,
    then restart Claude.)
 2. Approve access when Claude asks.
 
@@ -68,7 +68,7 @@ engine) using your real internet — so a full search finishes in seconds.
 it if you're comfortable with that; it asks for approval and you stay in control.
 Official page: https://github.com/wonderwhy-er/DesktopCommanderMCP
 
-### Option B — Your Terminal (no extra tools)
+### Option B. Your Terminal (no extra tools)
 
 If you'd rather not connect Desktop Commander, Claude will hand you a **single
 command** to paste into Terminal, e.g.:
@@ -78,13 +78,13 @@ python3 "<plugin>/skills/username-search/scripts/hunt.py" search USERNAME --form
 ```
 
 Run it, then paste the output back to Claude (or save it into your project folder).
-Same result — you just run the one command yourself.
+Same result, you just run the one command yourself.
 
 ---
 
 ## 3. Python 3.8+
 
-The engine and report builder are plain Python — **no `pip install` needed**.
+The engine and report builder are plain Python (**no `pip install` needed**).
 
 - **Check:** `python3 --version` → needs **3.8 or newer**.
 - **macOS:** usually already there (ships with 3.9+). If missing, install from
@@ -105,6 +105,6 @@ block as evidence and continue.) This keeps the work lawful and reliable.
 
 ## Sources
 
-- Browser MCP — https://browsermcp.io/install
-- Playwright MCP — https://github.com/microsoft/playwright-mcp
-- Desktop Commander — https://github.com/wonderwhy-er/DesktopCommanderMCP
+- Browser MCP. https://browsermcp.io/install
+- Playwright MCP. https://github.com/microsoft/playwright-mcp
+- Desktop Commander. https://github.com/wonderwhy-er/DesktopCommanderMCP

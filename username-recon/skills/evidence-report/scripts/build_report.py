@@ -13,20 +13,20 @@ This script uses ONLY the Python standard library (no `pip install`).
 Court-ready features
 --------------------
   * Per-finding capture metadata: full URL, UTC capture timestamp, capture method,
-    page title, HTTP status, examiner notes.
+    page title, HTTP status, and investigator notes.
   * SHA-256 hash of every screenshot, computed from the file bytes at build time
     and printed beside the image (chain-of-custody / integrity).
   * In-browser re-verification: the page recomputes each screenshot's SHA-256 from
     the embedded bytes (Web Crypto) and shows VERIFIED / MISMATCH, so a reviewer
     can confirm nothing was altered after the report was built.
-  * Case header (case id, examiner, subject, authorization basis, dates).
+  * Case header (case id, investigator, subject, authorization basis, dates).
   * Search + status/category filtering, screenshot lightbox, and clean print CSS
     (prints/export-to-PDF with every screenshot expanded).
 
 Usage
 -----
   # 1. Scaffold a case file you can fill in (or have Claude fill in):
-  python3 build_report.py --init case.json --case-id TCS-2026-014 --subject johndoe
+  python3 build_report.py --init case.json --case-id CASE-2026-014 --subject johndoe
 
   # 2. Build the report from the case file:
   python3 build_report.py case.json --out report.html
@@ -390,7 +390,7 @@ JS = r"""
 
   // ---- Relevance selection + export -----------------------------------
   var selcount = document.getElementById('selcount');
-  var STORE_KEY = 'tcs-evidence-' + ((window.CASE && CASE.case_id) ? CASE.case_id : 'case');
+  var STORE_KEY = 'osint-evidence-' + ((window.CASE && CASE.case_id) ? CASE.case_id : 'case');
 
   function relCards(){ return cards.filter(isRel); }
   function updateSel(){
@@ -475,7 +475,7 @@ JS = r"""
           +'```json\n'+caseJSON()+'\n```';
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(msg).then(function(){ flash('copyclaude','Copied ✓'); },
-        function(){ alert('Copy failed — your browser blocked clipboard access.'); });
+        function(){ alert('Copy failed. Your browser blocked clipboard access.'); });
     } else { alert('Clipboard not available in this browser.'); }
   }
   function flash(id,txt){ var b=document.getElementById(id); if(!b) return;
@@ -519,7 +519,7 @@ def render_card(f):
     # Screenshot block
     shot_id = f"shot{idx}"
     if f["_has_image"]:
-        cap = f"{f.get('site','')} — {url}  |  captured {f.get('captured_at','')}"
+        cap = f"{f.get('site','')}  |  {url}  |  captured {f.get('captured_at','')}"
         shot = (
             f'<div class="shot" data-id="{shot_id}" data-full="{esc(f["_img_uri"])}" '
             f'data-sha256="{esc(f["_sha256"])}" data-cap="{esc(cap)}">'
@@ -528,15 +528,15 @@ def render_card(f):
         )
         size = fmt_size(f["_img_bytes"])
         hash_row = (
-            f'<div class="hash mono">SHA-256: {esc(f["_sha256"])}'
+            f'<div class="hash mono">SHA-256 {esc(f["_sha256"])}'
             f'<button class="copybtn" data-copy="{esc(f["_sha256"])}">copy</button>'
             f'<span class="integrity pending" data-for="{shot_id}">checking…</span>'
             f'<span style="color:var(--muted)">({size})</span></div>'
         )
     elif f.get("_img_missing"):
-        shot = (f'<div class="shot"><div class="noimg">screenshot file not found:<br>'
+        shot = (f'<div class="shot"><div class="noimg">screenshot file not found<br>'
                 f'<span class="mono">{esc(f.get("_missing_path"))}</span></div></div>')
-        hash_row = '<div class="hash">SHA-256: <span style="color:var(--bad)">n/a — file missing</span></div>'
+        hash_row = '<div class="hash">SHA-256 <span style="color:var(--bad)">n/a (file missing)</span></div>'
     else:
         shot = '<div class="shot"><div class="noimg">no screenshot captured</div></div>'
         hash_row = ''
@@ -555,7 +555,7 @@ def render_card(f):
     return (
         f'<div class="card" data-idx="{idx}" data-status="{status}" data-category="{category}" data-search="{search_blob}">'
         f'<label class="selstrip"><input type="checkbox" class="relflag" data-idx="{idx}" checked> '
-        f'Relevant &mdash; include in export</label>'
+        f'Relevant, include in export</label>'
         f'{shot}'
         f'<div class="body">'
         f'<div class="row1"><span class="site">{site}</span>'
@@ -568,7 +568,7 @@ def render_card(f):
 
 def render_report(case, enriched):
     c = case.get("case", {})
-    title = c.get("title") or (f"Username footprint — {c.get('subject','')}" if c.get("subject") else "OSINT evidence report")
+    title = c.get("title") or (f"Username footprint for {c.get('subject','')}" if c.get("subject") else "OSINT evidence report")
     subject = c.get("subject") or ""
     generated = now_utc_iso()
 
@@ -586,14 +586,14 @@ def render_report(case, enriched):
     # Header meta rows
     meta_fields = [
         ("Case ID", c.get("case_id")),
-        ("Examiner", c.get("examiner")),
-        ("Subject / username", subject),
+        ("Investigator", c.get("investigator") or c.get("examiner")),
+        ("Subject username", subject),
         ("Authorization basis", c.get("authorization")),
         ("Opened", c.get("opened")),
         ("Report generated (UTC)", generated),
     ]
     meta_html = "".join(
-        f'<div><div class="k">{esc(k)}</div><div class="v">{esc(v) if v else "&mdash;"}</div></div>'
+        f'<div><div class="k">{esc(k)}</div><div class="v">{esc(v) if v else "Not provided"}</div></div>'
         for k, v in meta_fields
     )
 
@@ -641,7 +641,7 @@ def render_report(case, enriched):
 
     # Header
     parts.append('<div class="report-head">')
-    parts.append('<div class="brand"><span class="dot"></span> The Cyber Samaritan &middot; OSINT Evidence Report</div>')
+    parts.append('<div class="brand"><span class="dot"></span> Claude OSINT Investigator</div>')
     parts.append(f'<h1>{esc(title)}</h1>')
     if subject:
         parts.append(f'<div>Subject username: <span class="subj">{esc(subject)}</span></div>')
@@ -702,7 +702,7 @@ def render_report(case, enriched):
                  '<img id="lbimg" alt="enlarged screenshot evidence">'
                  '<div class="cap" id="lbcap"></div></div>')
 
-    # Metadata blob for client-side export (no base64 — keeps it light).
+    # Metadata blob for client-side export (no base64, keeps it light).
     findings_js = []
     for f in enriched:
         findings_js.append({
@@ -744,7 +744,7 @@ def write_template(path, args):
         "case": {
             "title": args.title or "",
             "case_id": args.case_id or "",
-            "examiner": args.examiner or "",
+            "investigator": args.investigator or args.examiner or "",
             "subject": args.subject or "",
             "authorization": "Self-footprint / consented investigation / authorized research",
             "opened": now_utc_iso(),
@@ -794,7 +794,8 @@ def build_parser():
     # Optional pre-fills for --init:
     p.add_argument("--title", help="Case title (with --init).")
     p.add_argument("--case-id", dest="case_id", help="Case identifier (with --init).")
-    p.add_argument("--examiner", help="Examiner name (with --init).")
+    p.add_argument("--investigator", help="Investigator name, optional (with --init).")
+    p.add_argument("--examiner", help=argparse.SUPPRESS)  # backward-compatible alias for --investigator
     p.add_argument("--subject", help="Subject username (with --init).")
     return p
 
@@ -833,7 +834,7 @@ def main(argv=None):
     print(f"    {len(enriched)} findings  |  {found} found  |  {shots} screenshots embedded"
           + (f"  |  {missing} screenshot file(s) MISSING" if missing else ""))
     if missing:
-        print("[!] Some screenshot paths did not resolve — check the case file.")
+        print("[!] Some screenshot paths did not resolve. Check the case file.")
 
 
 if __name__ == "__main__":

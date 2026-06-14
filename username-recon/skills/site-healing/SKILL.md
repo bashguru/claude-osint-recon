@@ -10,12 +10,12 @@ description: >
   repairs the site's detection rule in the manifest.
 metadata:
   version: "0.3.0"
-  author: "The Cyber Samaritan"
+  author: "Claude OSINT Investigator"
 ---
 
 # Site healing (keep detection accurate)
 
-Websites change how they respond, which silently breaks username detection —
+Websites change how they respond, which silently breaks username detection,
 producing false positives (every name "found") or false negatives (real accounts
 "missed"). This skill diagnoses and repairs those rules so the username-search
 engine stays trustworthy. This is the "self-healing" half of the plugin.
@@ -23,18 +23,18 @@ engine stays trustworthy. This is the "self-healing" half of the plugin.
 ## Where to run it (execution tiers)
 
 `verify` uses the same `hunt.py` engine as search, so run it on the highest tier
-available: prefer the **analyst's own machine** (local CLI) over the **Claude
-sandbox** (last resort — its flagged IP causes spurious `waf_blocked` verdicts
+available. Prefer the **analyst's own machine** (local CLI) over the **Claude
+sandbox** (a last resort, since its flagged IP causes spurious `waf_blocked` verdicts
 that look like broken sites). When you need to *eyeball* a profile to repair a
 rule, use the **browser MCP** (the browser-mcp extension first, playwright-mcp as
-the fallback) — and if a human-verification challenge appears, do not auto-bypass
-it: apply the run's bot policy (assisted = the analyst solves it; automated =
+the fallback). If a human-verification challenge appears, do not auto-bypass
+it. Apply the run's bot policy (assisted = the analyst solves it; automated =
 screenshot the block as evidence and continue). See the username-search
 `tradecraft.md` for the full tier model.
 
 ## How verification works
 
-Every site in the manifest carries a `username_claimed` value: a username that is
+Every site in the manifest carries a `username_claimed` value, a username that is
 known to exist there. That is the oracle. The engine probes each site twice:
 
 - with `username_claimed` → a healthy site answers **found**.
@@ -51,7 +51,7 @@ searches are accurate too):
 # One or more specific sites:
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/username-search/scripts/hunt.py" verify --site "GitHub" --site "Reddit"
 
-# Everything (slower — hundreds of live requests):
+# Everything (slower, hundreds of live requests):
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/username-search/scripts/hunt.py" verify --all
 
 # Machine-readable, for triage at scale:
@@ -59,27 +59,27 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/username-search/scripts/hunt.py" verify --
 ```
 
 After a real search returns surprising results, verify the specific sites in
-question first — it's fast and tells you whether the problem is the site or the
+question first. It's fast and tells you whether the problem is the site or the
 username.
 
 ## Read the verdict
 
-- `healthy` — known→found, random→not_found. Nothing to do.
-- `false_negative` — known account read as not-found. The "not found" message,
+- `healthy`. Known→found, random→not_found. Nothing to do.
+- `false_negative`. Known account read as not-found. The "not found" message,
   success status code, or profile URL changed. Repair toward detecting existence.
-- `false_positive` — random username read as found. The rule is too loose; the
+- `false_positive`. Random username read as found. The rule is too loose; the
   site likely returns 200 for everything now, or its error string moved.
-- `waf_blocked` — a firewall intercepted the probe. Detection can't be trusted;
+- `waf_blocked`. A firewall intercepted the probe. Detection can't be trusted;
   try a different probe/headers/proxy or leave the site flagged.
-- `error` — transient network/TLS issue. Re-run with a longer `--timeout`.
-- `no_oracle` — the entry has no `username_claimed`; add one, then re-verify.
-- `inconclusive` — mixed signals; inspect the site manually.
+- `error`. Transient network/TLS issue. Re-run with a longer `--timeout`.
+- `no_oracle`. The entry has no `username_claimed`; add one, then re-verify.
+- `inconclusive`. Mixed signals; inspect the site manually.
 
 ## Repair
 
-1. Open the suspect site in the **browser MCP** (preferred) or fetch it: view a
+1. Open the suspect site in the **browser MCP** (preferred) or fetch it, then view a
    **known-existing** profile and a **random missing** one. Compare status codes
-   and bodies. (If a bot challenge appears, hand off to the analyst — don't bypass.)
+   and bodies. (If a bot challenge appears, hand off to the analyst and don't bypass.)
 2. Decide the correct detection method and edit the site's entry in
    `${CLAUDE_PLUGIN_ROOT}/skills/username-search/data/data.json`:
    - Status differs (e.g. 200 vs 404) → `errorType: "status_code"` (add the
@@ -98,7 +98,7 @@ username.
 
 ## Refresh from upstream
 
-Before hand-repairing many sites, try refreshing the whole list — the community
+Before hand-repairing many sites, try refreshing the whole list, since the community
 may have already fixed it:
 
 ```bash
@@ -110,6 +110,6 @@ Re-run `verify --all` afterward to confirm.
 
 ## Automating health checks
 
-This pairs well with a scheduled task: run `verify --all --format json` on a
+This pairs well with a scheduled task. Run `verify --all --format json` on a
 cadence (e.g. weekly), then summarize any `false_positive`/`false_negative`
 sites so they can be repaired before they affect real searches.

@@ -1,9 +1,9 @@
 {
   "name": "username-recon",
   "version": "0.4.0",
-  "description": "OSINT username enumeration across hundreds of public sites with a browser-first workflow: verify accounts in a real browser, capture court-ready screenshot evidence, and build a self-contained HTML evidence report. Includes self-healing detection.",
+  "description": "OSINT username enumeration across hundreds of public sites with a browser-first workflow that verifies accounts in a real browser, captures court-ready screenshot evidence, and builds a self-contained HTML evidence report. Includes self-healing detection.",
   "author": {
-    "name": "The Cyber Samaritan"
+    "name": "Claude OSINT Investigator"
   },
   "keywords": [
     "osint",

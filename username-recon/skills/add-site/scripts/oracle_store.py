@@ -3,14 +3,14 @@
 username-recon : oracle_store.py
 ================================
 
-A tiny, dependency-free manager for **oracle credentials** — the throwaway test
+A tiny, dependency-free manager for **oracle credentials**, the throwaway test
 accounts whose only job is to be a "known-existing username" so the engine and the
 site-healing skill can keep a site's detection accurate over time.
 
 Why this exists: once an analyst (or Claude) registers a disposable account on a
 new site, storing it lets Claude re-verify the oracle is still alive and re-derive
 indicators later WITHOUT bothering the analyst again. Detection itself is always
-done logged out — these credentials are for maintenance, not for routine probing.
+done logged out. These credentials are for maintenance, not for routine probing.
 
 SAFETY MODEL (read this)
 ------------------------
@@ -57,7 +57,7 @@ import stat
 import sys
 from datetime import datetime, timezone
 
-WARNING = ("Throwaway OSINT oracle accounts only — never personal credentials. "
+WARNING = ("Throwaway OSINT oracle accounts only. Never personal credentials. "
            "Local secret file: do not share, commit, export, or include in any "
            "report. Detection runs logged out; these are for maintenance only.")
 

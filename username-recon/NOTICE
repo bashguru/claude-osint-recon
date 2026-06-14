@@ -9,12 +9,12 @@ The bundled site manifest (skills/username-search/data/data.json) is derived fro
 the Sherlock Project's community-maintained site list, which is distributed under
 the MIT License.
 
-  Sherlock Project — https://github.com/sherlock-project/sherlock
+  Sherlock Project, https://github.com/sherlock-project/sherlock
   Copyright (c) Sherlock Project contributors
   Licensed under the MIT License.
 
 Use `hunt.py update` to refresh the manifest from the upstream community list.
 
-This plugin is intended for lawful, authorized use only: checking your own
+This plugin is intended for lawful, authorized use only, such as checking your own
 accounts, consented investigations, security research, and brand/impersonation
 monitoring. Respect each site's Terms of Service and rate limits.

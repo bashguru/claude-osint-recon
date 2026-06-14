@@ -1,6 +1,6 @@
 # Evidence protocol & case-file schema
 
-The detailed reference behind the **evidence-report** skill: how to capture
+The detailed reference behind the **evidence-report** skill. It covers how to capture
 defensible screenshot evidence in the browser, what metadata to record, where
 files go, and the exact case-file format the generator (`build_report.py`)
 consumes.
@@ -10,7 +10,7 @@ consumes.
 - **Public pages only.** Never log in on the subject's behalf, never bypass
   access controls, never defeat a bot challenge. Capture what is publicly visible.
 - **Capture the truth of the moment.** A screenshot documents what was visible at
-  a specific UTC time at a specific URL — nothing more. An account is a *lead*,
+  a specific UTC time at a specific URL, nothing more. An account is a *lead*,
   not proof of identity.
 - **Integrity is computed, not asserted.** Each screenshot is hashed (SHA-256)
   from its file bytes so anyone can confirm it wasn't altered after capture.
@@ -33,45 +33,45 @@ building.
 
 ## Capturing in the browser (per tool)
 
-Capture one page at a time, **only for confirmed triage hits**: **navigate →
+Capture one page at a time, **only for confirmed triage hits**, with this flow: **navigate →
 confirm (from final URL + title; don't parse the whole DOM) → screenshot → record
-→ close.** If a tab is closed or drifts, re-navigate — canonical state lives in the
+→ close.** If a tab is closed or drifts, re-navigate. Canonical state lives in the
 case file, so a closed tab never loses progress.
 
-### Browser MCP extension (`mcp__browsermcp__*`) — primary
+### Browser MCP extension (`mcp__browsermcp__*`) (primary)
 
 - `browser_navigate` → the profile URL.
 - `browser_snapshot` to confirm the profile exists (correct username; not a "not
   found" page); `browser_screenshot` to capture, then save the returned image to
   `evidence/<case-id>/<site>.png`.
-- The extension drives the analyst's own browser and has no close tool — **reuse
-  the single controlled tab**: navigate it onward to the next URL rather than
+- The extension drives the analyst's own browser and has no close tool, so **reuse
+  the single controlled tab** by navigating it onward to the next URL rather than
   opening more. The analyst keeps their other tabs and closes this one when done.
 
-### Playwright (`mcp__playwright__*`) — fallback
+### Playwright (`mcp__playwright__*`) (fallback)
 
 - `browser_navigate` → the profile URL.
 - `browser_wait_for` → let it settle; then `browser_snapshot` to confirm the
   profile exists.
 - `browser_take_screenshot` → full page. **Note:** Playwright saves into its own
   output directory, which may be a different machine/sandbox than the report
-  generator — make sure the file ends up in `evidence/<case-id>/` where
+  generator, so make sure the file ends up in `evidence/<case-id>/` where
   `build_report.py` can read it. (This split is exactly why the extension is
   preferred.)
 - `browser_tabs` (close) or `browser_close` → **close the tab before the next
   site.** Do not accumulate tabs.
 
-### Bot challenges (policy — never auto-bypass)
+### Bot challenges (policy, never auto-bypass)
 
 Never programmatically solve or bypass a challenge (Cloudflare interstitial, "Press
 & Hold", hCaptcha/reCAPTCHA, "verify you are human"). Apply the run's bot policy
 (chosen in **username-search**):
 
-- **Assisted:** surface the challenge in the analyst's own browser and **pause**;
+- **Assisted.** Surface the challenge in the analyst's own browser and **pause**;
   on their confirmation, re-check and capture. If they **close the tab or skip**,
-  record the finding as `waf` with note "tab closed — not verified" and move on.
-- **Automated / unattended:** don't wait — **screenshot the challenge page itself**
-  as the evidence, record the finding as `waf` with note "bot challenge — blocked,
+  record the finding as `waf` with note "tab closed, not verified" and move on.
+- **Automated / unattended.** Don't wait. **Screenshot the challenge page itself**
+  as the evidence, record the finding as `waf` with note "bot challenge blocked,
   could not verify (captured for later review)", and continue.
 
 A challenged site is `waf` ("could not verify"), never a real negative.
@@ -93,9 +93,9 @@ A JSON object with a `case` header and a `findings` array.
 {
   "schema": "1.0",
   "case": {
-    "title": "Username footprint — johndoe",
-    "case_id": "TCS-2026-014",
-    "examiner": "Analyst Name (The Cyber Samaritan)",
+    "title": "Username footprint for johndoe",
+    "case_id": "CASE-2026-014",
+    "investigator": "",
     "subject": "johndoe",
     "authorization": "Self-footprint / consented investigation / authorized research",
     "opened": "2026-06-14T15:00:00Z",
@@ -113,7 +113,7 @@ A JSON object with a `case` header and a `findings` array.
       "method": "playwright-mcp",
       "page_title": "johndoe (John Doe) · GitHub",
       "http_status": 200,
-      "screenshot": "evidence/TCS-2026-014/github.png",
+      "screenshot": "evidence/CASE-2026-014/github.png",
       "notes": "Public profile, 42 repos, location 'NYC'."
     }
   ]
@@ -126,7 +126,7 @@ A JSON object with a `case` header and a `findings` array.
 | --- | --- | --- |
 | `title` | recommended | Report heading. Defaults from `subject` if omitted. |
 | `case_id` | recommended | Your case/reference identifier. |
-| `examiner` | recommended | Who performed the capture. |
+| `investigator` | optional | Investigator name shown on the report. Leave blank to omit it. |
 | `subject` | recommended | The username/handle investigated. |
 | `authorization` | recommended | The lawful basis (self-footprint, consent, authorized research). |
 | `opened` | optional | When the case opened (UTC ISO-8601). |
@@ -149,8 +149,8 @@ A JSON object with a `case` header and a `findings` array.
 | `http_status` | optional | HTTP status code, if known. |
 | `notes` | optional | What the screenshot shows; observations. |
 
-The generator adds, per finding with an image: the **SHA-256** of the file and the
-file size. These are not stored in the case file — they're computed at build time
+For each finding with an image, the generator adds the **SHA-256** of the file and the
+file size. These are not stored in the case file. They are computed at build time
 so they always match the actual bytes.
 
 ## Verifying integrity independently
@@ -159,8 +159,8 @@ Each card shows the SHA-256 the generator computed. To verify a screenshot
 outside the report:
 
 ```bash
-shasum -a 256 evidence/TCS-2026-014/github.png   # macOS
-sha256sum  evidence/TCS-2026-014/github.png       # Linux
+shasum -a 256 evidence/CASE-2026-014/github.png   # macOS
+sha256sum  evidence/CASE-2026-014/github.png       # Linux
 ```
 
 The value must match the report. The report itself also recomputes each hash

@@ -7,7 +7,7 @@ Read it when adding sites, repairing detection, or explaining the method.
 
 A username-enumeration tool does not "search" anything. It **guesses the profile
 URL** for a username on each known site and inspects the response to decide
-whether that profile exists. Everything rests on one observation: a site returns
+whether that profile exists. Everything rests on one observation. A site returns
 a *different, predictable* response for "this profile exists" vs "this profile
 does not exist." The whole craft is encoding that difference per site, then
 firing the checks fast and reading them correctly.
@@ -16,7 +16,7 @@ There are three reliable signals, and every site uses one (or a combination):
 
 ### 1. `status_code`
 The site returns `200` for a real profile and a non-2xx (usually `404`) for a
-missing one. This is the cheapest signal: a `HEAD` request is enough, so we never
+missing one. This is the cheapest signal, since a `HEAD` request is enough, so we never
 download the page body. ~⅔ of real-world sites work this way.
 
 - Found  → status is 2xx.
@@ -33,7 +33,7 @@ This needs a `GET` (we must read the body).
   present in the body.
 - Found → none of those strings are present.
 
-Note the inverted logic: we look for the **absence** of the "not found" message.
+Note the inverted logic. We look for the **absence** of the "not found" message.
 
 ### 3. `response_url`
 The site redirects a missing profile somewhere else (e.g. to the homepage or a
@@ -48,12 +48,12 @@ login page). We **disable redirect following** so we can see the original status
   clients. We send a real Firefox UA so we get the same page a human would.
 - **`regexCheck` pre-filter.** Each site has username rules (length, allowed
   characters). If the target username can't be valid there, we skip the request
-  entirely — faster, and avoids false hits on sites that "helpfully" 200 every
+  entirely. That's faster, and avoids false hits on sites that "helpfully" 200 every
   URL. A skipped site is reported as `illegal`.
 - **Concurrency.** Checks are independent, so we fire them across a thread pool
   (default 20 workers). 400 sites finish in seconds instead of minutes.
 - **WAF fingerprinting.** Cloudflare / AWS WAF / PerimeterX challenge pages
-  return `200` with a challenge body — which naively reads as "found". We match
+  return `200` with a challenge body, which naively reads as "found". We match
   known fingerprints and report `waf` (unknown) instead of a false positive.
   This list is the most time-sensitive part of the tool; WAFs change.
 - **`urlProbe`.** Sometimes the human-facing profile URL is hard to check but an
@@ -65,20 +65,20 @@ login page). We **disable redirect following** so we can see the original status
 `hunt.py` is a fast **triage** engine, not the final word. Run work on the highest
 tier available; the Claude sandbox is the last resort, not the default.
 
-1. **Browser MCP — primary.** A real browser (the browser-mcp extension first,
+1. **Browser MCP, primary.** A real browser (the browser-mcp extension first,
    playwright-mcp as the fallback) renders the page like a human sees it and is the
    only tier that produces **screenshot evidence**. Use it to confirm and document
    every `found` hit.
-2. **Local CLI — secondary.** Run `hunt.py` on the analyst's own machine (e.g. via
+2. **Local CLI, secondary.** Run `hunt.py` on the analyst's own machine (e.g. via
    a Desktop Commander MCP or their terminal). Same real IP as their browser, so
    far fewer firewall blocks than the sandbox. Best for fast bulk triage.
-3. **Sandbox — last resort.** Run `hunt.py` in the Claude sandbox only when neither
+3. **Sandbox, last resort.** Run `hunt.py` in the Claude sandbox only when neither
    of the above is available. Its IP is often flagged → more `waf`/blocked results.
    Never present sandbox output as final evidence; re-verify hits in the browser.
 
-The efficient pattern (the hard default): **triage** the full list with `hunt.py`
+The efficient pattern (the hard default) is to **triage** the full list with `hunt.py`
 (Tier 2 on the analyst's machine, else Tier 3), then **browser-verify only the
-`found` hits** — decide existence from the final URL + title (don't parse the whole
+`found` hits**. Decide existence from the final URL + title (don't parse the whole
 DOM), and screenshot for evidence. Never hand-browse the catalog for breadth.
 
 ### Page hygiene
@@ -94,14 +94,14 @@ and navigate it onward; with the Playwright fallback, close the tab
 `waf` fingerprinting (above) catches firewall **interstitials** during triage and
 reports "unknown" instead of a false positive. A **human-verification challenge**
 (Cloudflare "checking your browser", "Press & Hold", hCaptcha/reCAPTCHA, "verify
-you are human") is different: it must be handled in the browser, by the analyst.
+you are human") is different. It must be handled in the browser, by the analyst.
 
 The rule is **never auto-bypass**. Pick a policy at run start (see the
-**username-search** skill): **Assisted** — pause and let the analyst solve the
-challenge in their own browser (if they close the tab, record `waf` + "tab closed
-— not verified"); or **Automated** — screenshot the block page as evidence, record
-`waf` + "bot challenge — blocked, could not verify", and continue. Claude never
-solves or evades the challenge itself: a human solving their own challenge is fine,
+**username-search** skill). **Assisted** means you pause and let the analyst solve the
+challenge in their own browser (if they close the tab, record `waf` + "tab closed,
+not verified"). **Automated** means you screenshot the block page as evidence, record
+`waf` + "bot challenge, blocked, could not verify", and continue. Claude never
+solves or evades the challenge itself. A human solving their own challenge is fine,
 defeating it programmatically is not. See the **evidence-report** skill's
 `evidence-protocol.md` for the capture mechanics.
 
@@ -113,7 +113,7 @@ The manifest is a JSON object: `{ "Site Name": { ...fields... }, ... }`. Fields:
 | ----------------- | -------- | ------- |
 | `url`             | yes      | Profile URL with `{}` where the username goes. Shown to the user. |
 | `urlMain`         | yes      | Site homepage (for reference/reporting). |
-| `errorType`       | yes      | `"status_code"`, `"message"`, or `"response_url"` — or a list combining them. |
+| `errorType`       | yes      | `"status_code"`, `"message"`, or `"response_url"` (or a list combining them). |
 | `errorMsg`        | for `message` | String or list of strings that appear when a profile is missing. |
 | `errorCode`       | optional (`status_code`) | Int or list of status codes that mean "not found" even if 200-ish. |
 | `urlProbe`        | optional | Alternate URL to request instead of `url` (e.g. an API). Also `{}`-interpolated. |
@@ -196,7 +196,7 @@ section is the manual model behind it.
 ## Etiquette & limits
 
 - Public pages only; this never logs in or bypasses authentication.
-- Keep `--max-workers` reasonable and don't loop aggressively against one site —
-  that's how you trip WAFs and rate limits.
-- A `found` hit is a **lead**, not identity proof: the same handle on two sites
+- Keep `--max-workers` reasonable and don't loop aggressively against one site,
+  because that's how you trip WAFs and rate limits.
+- A `found` hit is a **lead**, not identity proof. The same handle on two sites
   may be two different people. Corroborate before drawing conclusions.

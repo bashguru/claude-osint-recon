@@ -1,13 +1,13 @@
 # Oracle credential store
 
-A small, local store of **throwaway oracle accounts** — the disposable test
+A small, local store of **throwaway oracle accounts**, the disposable test
 accounts whose only job is to be a "known-existing username" so the engine and the
 site-healing skill can keep a site's detection accurate over time. Managed by
 `${CLAUDE_PLUGIN_ROOT}/skills/add-site/scripts/oracle_store.py` (dependency-free).
 
 ## Why store credentials at all (detection is logged out)
 
-Routine username detection never needs a login — it reads public pages anonymously.
+Routine username detection never needs a login; it reads public pages anonymously.
 The oracle credentials are for **maintenance**, so Claude can do the lifting later
 without re-asking the analyst:
 
@@ -43,7 +43,7 @@ lives only here.
 
 ```json
 {
-  "_warning": "Throwaway OSINT oracle accounts only — never personal credentials. …",
+  "_warning": "Throwaway OSINT oracle accounts only. Never personal credentials. …",
   "sites": {
     "Example": {
       "site": "Example",
@@ -82,5 +82,5 @@ python3 "$ORC" remove --site "Example" --store "$STORE"
 1. **add-site** derives a rule using a throwaway account → store it here.
 2. Months later, `verify` flags the site (oracle deleted, or a redesign). Claude
    reads the stored account, logs in to confirm/inspect, re-derives the indicator,
-   and updates the manifest — no analyst round-trip.
+   and updates the manifest, no analyst round-trip.
 3. Rotate or `remove` the entry if the throwaway account is abandoned.
