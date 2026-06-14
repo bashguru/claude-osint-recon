@@ -1,0 +1,33 @@
+# Sandbox scratch (mount blocks deletion; safe to remove manually)
+.sandbox-trash/
+.git_broken_*/
+.__*
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+
+# Case evidence & investigation output (do not commit real subject data)
+evidence/
+Evidence_*.html
+*-evidence/
+shots/
+
+# Built artifacts
+*.plugin
+
+# Node
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs / temp
+*.log
+*.tmp

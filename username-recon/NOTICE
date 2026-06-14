@@ -1,0 +1,20 @@
+username-recon
+==============
+
+This plugin re-implements the username-enumeration technique popularized by the
+Sherlock Project. The detection engine (hunt.py) is original, dependency-free
+code written for this plugin.
+
+The bundled site manifest (skills/username-search/data/data.json) is derived from
+the Sherlock Project's community-maintained site list, which is distributed under
+the MIT License.
+
+  Sherlock Project — https://github.com/sherlock-project/sherlock
+  Copyright (c) Sherlock Project contributors
+  Licensed under the MIT License.
+
+Use `hunt.py update` to refresh the manifest from the upstream community list.
+
+This plugin is intended for lawful, authorized use only: checking your own
+accounts, consented investigations, security research, and brand/impersonation
+monitoring. Respect each site's Terms of Service and rate limits.

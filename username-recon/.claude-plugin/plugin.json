@@ -1,0 +1,22 @@
+{
+  "name": "username-recon",
+  "version": "0.4.0",
+  "description": "OSINT username enumeration across hundreds of public sites with a browser-first workflow: verify accounts in a real browser, capture court-ready screenshot evidence, and build a self-contained HTML evidence report. Includes self-healing detection.",
+  "author": {
+    "name": "The Cyber Samaritan"
+  },
+  "keywords": [
+    "osint",
+    "username",
+    "reconnaissance",
+    "sherlock",
+    "investigation",
+    "digital-footprint",
+    "evidence",
+    "screenshots",
+    "browser-automation",
+    "browser-mcp",
+    "playwright"
+  ],
+  "license": "MIT"
+}
