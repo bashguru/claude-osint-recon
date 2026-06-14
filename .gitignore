@@ -15,7 +15,9 @@ Evidence_*.html
 shots/
 
 # Built artifacts
+# (the distributable username-recon.plugin IS tracked so users can download it)
 *.plugin
+!username-recon.plugin
 
 # Node
 node_modules/
