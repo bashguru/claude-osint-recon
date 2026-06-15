@@ -59,6 +59,7 @@ capture; closing a tab never loses progress (state lives in the case file).
 | Skill: **evidence-report** | Capture protocol + build the court-ready HTML report. |
 | Skill: **site-healing** | Diagnose false positives/negatives and repair the manifest (username or email). |
 | Skill: **add-site** | Assess whether a new site is a valid candidate, derive its detection rule (logged-out, using a throwaway account/email as the oracle), verify it, and store the throwaway oracle credentials locally for reuse. |
+| Skill: **adsbexchange-analyst** | Pull historical flight records for a specific aircraft from ADS-B Exchange (free globe map by default), capture court-ready snapshot evidence, export the KML 3D flight path, and stand up a scheduled monitor that alerts on a condition (live API). Self-heals its own selector and endpoint map. |
 | Engine: `hunt.py` | Dependency-free CLI: `search`, `email`, `infostealer`, `verify` (`--email`), `update`, `list`. Shared request strategy (modern UA + headers, retries, optional `--rotate-ua`/`--delay`/`--proxy-file`) and one classifier. |
 | Generator: `build_report.py` | Dependency-free: turns findings + screenshots into one self-contained HTML report. |
 | Manifest: `data/data.json` | Community-maintained username site list (snapshot bundled; `update` fetches latest, preserving locally added sites). |

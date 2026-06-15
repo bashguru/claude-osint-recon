@@ -147,7 +147,7 @@ On Linux use your package manager. There is nothing to `pip install`.
 ## The skills, and how to ask for each
 
 A "skill" is just a capability the plugin knows how to do. You never call them by
-name; you ask in plain language and Claude picks the right one. There are seven.
+name; you ask in plain language and Claude picks the right one. There are eight.
 
 | Skill | What it is for | Say something like |
 | --- | --- | --- |
@@ -158,6 +158,7 @@ name; you ask in plain language and Claude picks the right one. There are seven.
 | **evidence-report** | Captures the screenshots and builds the court-ready HTML report. | *"build me the evidence report"*, *"I'd like the output now"* |
 | **site-healing** | Checks that detection for a site is still accurate, and fixes it if a site changed. | *"does the GitHub detection still look right?"*, *"this result looks wrong"* |
 | **add-site** | Teaches the tool a brand-new site to check. | *"can we add this site to the list?"* |
+| **adsbexchange-analyst** | Pulls an aircraft's flight history from ADS-B Exchange, captures evidence, exports the KML flight path, and can watch a plane and alert you. | *"where did tail N76528 go after leaving Austin?"*, *"watch this plane and tell me when it's within 100 miles of KAUS"* |
 
 The optional **infostealer leak check** (Hudson Rock) is requested the same way:
 *"has this email shown up in any malware leaks?"* Claude shows a privacy notice and

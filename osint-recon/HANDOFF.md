@@ -23,7 +23,7 @@ continue). Breadth runs on the concurrent triage engine; the browser only verifi
 the confirmed hits, one clean tab at a time. Closing a tab never loses progress
 (state lives in the case file).
 
-## Seven skills inside
+## Eight skills inside
 
 - **preflight** checks all prerequisites (Playwright, local execution for
   triage, Python) and helps a non-technical analyst set up anything missing. Runs
@@ -38,6 +38,10 @@ the confirmed hits, one clean tab at a time. Closing a tab never loses progress
   sites when they change.
 - **add-site** assesses a new site's candidacy and derives + verifies a detection rule
   (logged-out, using a throwaway account as the oracle).
+- **adsbexchange-analyst** pulls aircraft flight history from ADS-B Exchange (free
+  globe map by default), captures court-ready snapshot evidence, exports the KML 3D
+  flight path, and stands up a scheduled live-API monitor that alerts on a condition.
+  Self-heals its own selector and endpoint map.
 
 ## Run it (three ways)
 

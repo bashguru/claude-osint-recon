@@ -1,7 +1,7 @@
 {
   "name": "osint-recon",
-  "version": "0.8.0",
-  "description": "OSINT identity enumeration across hundreds of public sites by username or email, with a browser-first workflow that verifies accounts in a real browser, captures court-ready screenshot evidence, and builds a self-contained HTML report. Includes self-healing detection, an optional infostealer-leak check, and a combined recon workflow.",
+  "version": "0.9.0",
+  "description": "OSINT identity enumeration across hundreds of public sites by username or email, with a browser-first workflow that verifies accounts in a real browser, captures court-ready screenshot evidence, and builds a self-contained HTML report. Includes self-healing detection, an optional infostealer-leak check, a combined recon workflow, and an ADS-B Exchange flight-tracking analyst for aircraft history, snapshot evidence, KML export, and scheduled aircraft monitoring.",
   "author": {
     "name": "Claude OSINT Investigator"
   },
@@ -18,7 +18,13 @@
     "infostealer",
     "hudson-rock",
     "browser-automation",
-    "playwright"
+    "playwright",
+    "adsb",
+    "adsb-exchange",
+    "aircraft",
+    "flight-tracking",
+    "aviation",
+    "kml"
   ],
   "license": "MIT"
 }
