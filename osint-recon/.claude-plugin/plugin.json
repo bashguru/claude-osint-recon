@@ -1,7 +1,7 @@
 {
   "name": "osint-recon",
-  "version": "0.9.0",
-  "description": "OSINT identity enumeration across hundreds of public sites by username or email, with a browser-first workflow that verifies accounts in a real browser, captures court-ready screenshot evidence, and builds a self-contained HTML report. Includes self-healing detection, an optional infostealer-leak check, a combined recon workflow, and an ADS-B Exchange flight-tracking analyst for aircraft history, snapshot evidence, KML export, and scheduled aircraft monitoring.",
+  "version": "0.10.0",
+  "description": "OSINT investigation across hundreds of public sites by username or email, with a browser-first workflow that verifies accounts in a real browser, captures court-ready screenshot evidence, and builds a self-contained HTML report. Includes self-healing detection, an optional infostealer-leak check, a combined recon workflow, an ADS-B Exchange flight-tracking analyst for aircraft history, snapshot evidence, KML export, and scheduled aircraft monitoring, and a Bitcoin crypto-trace engine on the public WalletExplorer API for address and transaction attribution, forward tracing to a cash-out, and peel-chain and mixer detection, all feeding the same evidence report.",
   "author": {
     "name": "Claude OSINT Investigator"
   },
@@ -24,7 +24,14 @@
     "aircraft",
     "flight-tracking",
     "aviation",
-    "kml"
+    "kml",
+    "bitcoin",
+    "crypto",
+    "cryptocurrency",
+    "blockchain",
+    "bitcoin-tracing",
+    "walletexplorer",
+    "wallet-attribution"
   ],
   "license": "MIT"
 }
