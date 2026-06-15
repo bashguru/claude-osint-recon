@@ -40,8 +40,9 @@ is standard, lawful OSINT.
 Before anything else, run the **preflight** skill to confirm prerequisites. You
 need the Playwright MCP (the required browser for verify + screenshots), a way to run triage on the
 analyst's machine (Desktop Commander or their terminal, since the sandbox is
-egress-limited), and Python 3.8+. It guides setup for anything missing. Tell the
-analyst what's ready, then start.
+egress-limited), and Python 3.8+. It guides setup for anything missing, and it
+self-skips fast when preflight already passed, so the analyst does not wait through it
+again. Tell the analyst what's ready, then start.
 
 ## Step 0.5 (ask for an optional investigator name)
 

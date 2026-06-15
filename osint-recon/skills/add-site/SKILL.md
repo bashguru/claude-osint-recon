@@ -33,7 +33,8 @@ public-pages-only ethic.
 
 ## Step 1. Preflight & assess candidacy
 
-1. Run **preflight** so prerequisites (browser + local execution) are ready.
+1. Run **preflight** so prerequisites (browser + local execution) are ready. It
+   self-skips when already verified.
 2. Open the site and find whether it has **public, per-username profile URLs**,
    a stable pattern like `site.com/{user}`, `site.com/u/{user}`, `site.com/@{user}`,
    or `site.com/users/{user}`. View a real profile **logged out**.

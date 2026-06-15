@@ -14,6 +14,9 @@ Evidence_*.html
 *-evidence/
 shots/
 
+# Local preflight cache (per-machine/session state, not code)
+.osint-preflight.json
+
 # Built artifacts
 # (the distributable osint-recon.plugin IS tracked so users can download it)
 *.plugin

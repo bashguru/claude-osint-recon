@@ -72,7 +72,8 @@ and only pass `--nsfw` if they say yes.
 ## Step 0. Preflight (always)
 
 Run the **preflight** skill first (Playwright, local execution for triage, Python
-3.8+). Email triage, like username triage, must run on the **analyst's machine**
+3.8+). It self-skips when already verified, so it will not make the analyst wait.
+Email triage, like username triage, must run on the **analyst's machine**
 (Desktop Commander or their terminal). The Claude sandbox is egress-limited and
 will reach almost nothing, so never rely on in-sandbox results.
 

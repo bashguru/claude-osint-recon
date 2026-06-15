@@ -33,7 +33,8 @@ not combine results with home addresses or other locating data. A match is a
 
 ## Step 0. Preflight and run setup
 
-1. Run **preflight** (Playwright, local execution for triage, Python 3.8+).
+1. Run **preflight** (Playwright, local execution for triage, Python 3.8+). It
+   self-skips when already verified, so it will not make the analyst wait.
    Triage runs on the **analyst's machine**, not the sandbox.
 2. Ask the analyst, briefly and without guessing:
    - which identifiers they have (a username, an email, or both),

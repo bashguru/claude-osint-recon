@@ -82,6 +82,18 @@ The engine and report builder are plain Python (**no `pip install` needed**).
 
 ---
 
+## Remembering that setup passed
+
+Once everything checks out, Claude saves a small file called `.osint-preflight.json`
+in your working folder so it does not make you wait through setup again next time.
+Python is remembered for good (it does not change). The browser and Desktop Commander
+connect fresh each time you start Claude, so Claude quietly re-checks just those two at
+the start of a new session, but you will not see the full walkthrough again unless
+something actually broke. If you ever want to start clean, delete `.osint-preflight.json`
+and Claude will run the full check from scratch.
+
+---
+
 ## A note on human-checks (CAPTCHAs / "are you human")
 
 Run Playwright **visible** so you can solve these. Claude
