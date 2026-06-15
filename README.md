@@ -7,6 +7,11 @@ real accounts in a web browser, takes a screenshot of each one, and assembles
 everything into a single, court-ready evidence report. It can also check, with your
 permission, whether an identity shows up in known infostealer-malware leaks.
 
+It also tracks **aircraft**. Give it a flight number or a tail number and it pulls an
+aircraft's flight history from ADS-B Exchange (the public flight-tracking service),
+captures the same court-ready evidence, exports the 3D flight path, and can even watch
+a plane and alert you when it meets a condition.
+
 The plugin itself lives in the [`osint-recon/`](osint-recon/) folder. This page
 is the friendly guide. A shorter technical overview is in
 [`osint-recon/README.md`](osint-recon/README.md).
@@ -17,7 +22,9 @@ is the friendly guide. A shorter technical overview is in
 > investigations you are authorized to run, security research, or
 > brand and impersonation monitoring. Do not use it to stalk, harass, or physically
 > locate a person. A match is a **lead, not proof of identity**: the same handle or
-> email can belong to different people, or be reused, recycled, or shared.
+> email can belong to different people, or be reused, recycled, or shared. A
+> **flight track** is likewise a lead and a record of a public radio broadcast, not
+> proof of who was on board.
 
 ---
 
@@ -35,6 +42,10 @@ is the friendly guide. A shorter technical overview is in
 5. **Optional extras.** Investigate a username and an email together in one pass, and
    optionally check an identity against infostealer-malware leak data (a third-party
    service, only when you say yes).
+6. **Track aircraft.** Give a tail number, flight number, or hex code and it pulls an
+   aircraft's flight history from ADS-B Exchange, captures the same evidence, exports
+   the KML 3D flight path, or watches the aircraft and alerts you on a condition (see
+   *Tracking aircraft with ADS-B Exchange* below).
 
 ### Three ways to search
 
@@ -166,6 +177,53 @@ asks before sending anything to that third-party service.
 
 ---
 
+## Tracking aircraft with ADS-B Exchange
+
+The newest skill, **adsbexchange-analyst**, brings the same plain-language,
+evidence-first approach to aircraft. You can give Claude any one of these, and it will
+explain which is which if you are not sure:
+
+- a **flight number** (like UAL2177, the airline and number for a scheduled flight),
+- a **tail number** (like N76528, the registration painted on the aircraft), or
+- a **hex code** (like A4400F, the aircraft's unique radio id).
+
+It does four things, and it asks one easy question at a time so you are never left
+guessing:
+
+- **See where a flight went in the past.** *"Where did tail N76528 go after leaving
+  Austin on the 14th?"* Claude pulls that day's track on the free public map, steps to
+  the leg that departed the airport, and shows you what it found. This is free and
+  needs no account. All times on the service are in UTC, a single world clock, and
+  Claude converts your local date for you.
+- **See where an aircraft is right now.** *"Where is N76528 right now?"* This uses the
+  live data service (see the cost note below).
+- **Get the 3D flight path.** Ask for the **KML** file, a file you open in Google
+  Earth to fly along the route, and Claude saves it next to your evidence.
+- **Watch an aircraft and get an alert.** *"Watch N76528 and tell me when it gets
+  within 100 miles of KAUS, check every 5 minutes."* Claude sets up a scheduled check
+  that alerts you the first time the condition is met.
+
+**Evidence works the same way.** For a past flight, Claude captures a court-ready
+screenshot of exactly what was on screen, with the full link, the UTC time, and a
+tamper-check code, in the same HTML report as the rest of the plugin. It always
+confirms with you before saving photos or downloading a file, so nothing happens by
+surprise.
+
+**Free vs. paid, in plain terms.** Looking at past flights on the map is **free**.
+Live position and the watch-and-alert monitor use ADS-B Exchange's paid data service
+(about 10 US dollars a month via RapidAPI, with no free tier). If you ask for
+something that needs it and no key is set up, Claude tells you plainly, offers to walk
+you through getting one, and stores it securely on your own machine (never shown on
+screen or written into a report). For history older or larger than the free map
+shows, there is also an opt-in paid archive Claude can set up.
+
+**A note on alerts.** A watch-and-alert runs as a scheduled task, so it only fires
+while your computer is awake and Claude is open. Claude explains this, mentions the
+always-on cloud alternative, and warns you if checking too often would run past the
+monthly request limit. To stop a monitor, you pause or delete that scheduled task.
+
+---
+
 ## Common use cases
 
 - **Check your own footprint.** "Find my handle `janedoe` and show me everywhere it
@@ -177,8 +235,11 @@ asks before sending anything to that third-party service.
   timestamped evidence file.
 - **Security research.** Map the public footprint tied to an identifier, including an
   optional check for whether it appears in infostealer leak data.
+- **Track an aircraft's movements.** With authorization, pull the flight history for a
+  tail number that left an airport on a date, capture the evidence and the KML flight
+  path, or set an alert for when the aircraft approaches a destination.
 
-In every case the deliverable is the same: confirmed accounts, with screenshots and a
+In every case the deliverable is the same: confirmed findings, with screenshots and a
 report you can keep.
 
 ---
