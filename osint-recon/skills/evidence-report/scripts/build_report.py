@@ -279,17 +279,62 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .foot h3{color:var(--ink);font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}
 .hidden{display:none!important}
 
+/* Print-only summary index (hidden on screen; shown only when printing) */
+.print-only{display:none}
+.print-summary{width:100%;border-collapse:collapse;margin:4px 0 20px}
+.print-summary caption{text-align:left;font-size:13px;font-weight:700;color:#000;
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.print-summary th,.print-summary td{border:1px solid #bbb;padding:6px 8px;font-size:11px;
+  text-align:left;vertical-align:top}
+.print-summary th{background:#eee;text-transform:uppercase;letter-spacing:.04em;font-size:10px}
+.print-summary td.u{word-break:break-all}
+.print-summary td.h{font-family:ui-monospace,monospace;font-size:10px;color:#333}
+.print-summary .st{font-weight:700;text-transform:uppercase;font-size:10px}
+.print-summary .st.found{color:#0a7d2e}
+.print-summary .st.review,.print-summary .st.waf{color:#8a5a00}
+.print-summary .st.error,.print-summary .st.not_found{color:#b3261e}
+
+/* Printer-friendly output. The on-screen (dark) report is unchanged; this block
+   re-themes only the printout: a light palette, ink-light status badges, bounded
+   screenshots, sensible page margins, and clean page breaks. */
 @media print{
+  @page{margin:14mm}
+  /* Re-map the dark palette to a light, high-contrast one for paper. */
+  :root{
+    --bg:#fff;--panel:#fff;--panel2:#fff;--chip:#fff;--line:#bbb;
+    --ink:#000;--muted:#333;--accent:#0a7d2e;--accent2:#0b5bd0;--warn:#8a5a00;--bad:#b3261e;
+  }
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;color:#000}
-  .controls,.lb,.expand,.copybtn,.exportbar,.selstrip{display:none!important}
-  .card.not-relevant{display:none!important}
+  /* Hide interactive chrome. */
+  .controls,.lb,.expand,.copybtn,.exportbar,.selstrip,.count-note{display:none!important}
+  .card.not-relevant,.sumrow.not-relevant{display:none!important}
+  /* Show the print index. */
+  .print-only{display:block!important}
+  table.print-summary{display:table!important}
   .wrap{max-width:none;padding:0}
-  .report-head{background:#fff;border-color:#999}
-  .card{break-inside:avoid;border-color:#999}
-  .card .shot{aspect-ratio:auto;cursor:default}
-  .card .shot img{height:auto;object-fit:contain}
+  .report-head{background:#fff;border-color:#999;break-inside:avoid;break-after:avoid}
+  .brand .dot{box-shadow:none}
+  .stats{break-inside:avoid}
+  .stat{background:#fff;border-color:#bbb}
+  /* Cards: light, atomic, with a bounded (about half-page) screenshot. */
+  .card{background:#fff;border-color:#999;break-inside:avoid;margin-bottom:10px}
+  .card .body{background:#fff}
+  .notes{background:#fff;border-color:#bbb;color:#000}
+  .badge{background:#fff!important;border-color:#999}
+  .badge.found{color:#0a7d2e;border-color:#0a7d2e}
+  .badge.review,.badge.waf{color:#8a5a00;border-color:#8a5a00}
+  .badge.error,.badge.not_found{color:#b3261e;border-color:#b3261e}
+  .hash .integrity.ok{color:#0a7d2e;border-color:#0a7d2e}
+  .hash .integrity.bad{color:#b3261e;border-color:#b3261e}
+  .card .shot{aspect-ratio:auto;background:#fff;border-bottom:1px solid #ccc;
+    text-align:center;cursor:default}
+  .card .shot img{max-height:4.6in;width:auto;max-width:100%;height:auto;
+    object-fit:contain;display:inline-block}
   a{color:#000}
-  .grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr;gap:0}
+  .foot,.foot p{break-inside:avoid}
+  .foot h3{break-after:avoid}
 }
 """
 
@@ -396,7 +441,12 @@ JS = r"""
   function updateSel(){
     var n = relCards().length;
     if(selcount) selcount.textContent = n;
-    cards.forEach(function(c){ c.classList.toggle('not-relevant', !isRel(c)); });
+    cards.forEach(function(c){
+      var rel = isRel(c);
+      c.classList.toggle('not-relevant', !rel);
+      var row = document.querySelector('.sumrow[data-idx="'+c.getAttribute('data-idx')+'"]');
+      if(row) row.classList.toggle('not-relevant', !rel);
+    });
     persist();
   }
   function persist(){
@@ -566,6 +616,40 @@ def render_card(f):
     )
 
 
+def render_summary_table(enriched):
+    """Print-only index of all findings (hidden on screen). One row per finding,
+    wired by data-idx to the relevance checkboxes so deselected findings drop out
+    of the printed index as well as the printed cards."""
+    rows = []
+    for f in enriched:
+        idx = f["_index"]
+        site = esc(f.get("site") or "(unnamed site)")
+        status = f.get("status") or "found"
+        status_class = status if status in ("found", "not_found", "waf", "error") else "review"
+        url = esc(f.get("profile_url") or f.get("captured_url") or "")
+        cap = esc(f.get("captured_at") or "")
+        sha = f.get("_sha256") or ""
+        sha_short = (sha[:16] + "…") if sha else "n/a"
+        rows.append(
+            f'<tr class="sumrow" data-idx="{idx}">'
+            f'<td>{site}</td>'
+            f'<td><span class="st {status_class}">{esc(status.replace("_", " "))}</span></td>'
+            f'<td class="u">{url}</td>'
+            f'<td>{cap}</td>'
+            f'<td class="h">{esc(sha_short)}</td>'
+            f'</tr>'
+        )
+    if not rows:
+        return ""
+    return (
+        '<table class="print-summary print-only">'
+        '<caption>Summary of findings</caption>'
+        '<thead><tr><th>Site</th><th>Status</th><th>URL</th>'
+        '<th>Captured (UTC)</th><th>SHA-256 (first 16)</th></tr></thead>'
+        '<tbody>' + "".join(rows) + '</tbody></table>'
+    )
+
+
 def render_report(case, enriched):
     c = case.get("case", {})
     title = c.get("title") or (f"Username footprint for {c.get('subject','')}" if c.get("subject") else "OSINT evidence report")
@@ -650,6 +734,9 @@ def render_report(case, enriched):
 
     # Stats
     parts.append(f'<div class="stats">{stats_html}</div>')
+
+    # Print-only summary index (becomes page 1 when printed; hidden on screen)
+    parts.append(render_summary_table(enriched))
 
     # Controls
     parts.append('<div class="controls">')
