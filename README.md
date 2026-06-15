@@ -191,10 +191,12 @@ It does four things, and it asks one easy question at a time so you are never le
 guessing:
 
 - **See where a flight went in the past.** *"Where did tail N76528 go after leaving
-  Austin on the 14th?"* Claude pulls that day's track on the free public map, steps to
-  the leg that departed the airport, and shows you what it found. This is free and
-  needs no account. All times on the service are in UTC, a single world clock, and
-  Claude converts your local date for you.
+  Austin on the 14th?"* You can give **any specific historical date** (a normal local
+  date is fine, Claude converts it to UTC, a single world clock, for you). Claude pulls
+  that day's track on the free public map, steps to the leg that departed the airport,
+  and shows you what it found, with no account needed. How far back the free map
+  reaches depends on ADS-B Exchange's data retention; for older history there is an
+  opt-in archive Claude can set up.
 - **See where an aircraft is right now.** *"Where is N76528 right now?"* This uses the
   live data service (see the cost note below).
 - **Get the 3D flight path.** Ask for the **KML** file, a file you open in Google
@@ -236,8 +238,9 @@ monthly request limit. To stop a monitor, you pause or delete that scheduled tas
 - **Security research.** Map the public footprint tied to an identifier, including an
   optional check for whether it appears in infostealer leak data.
 - **Track an aircraft's movements.** With authorization, pull the flight history for a
-  tail number that left an airport on a date, capture the evidence and the KML flight
-  path, or set an alert for when the aircraft approaches a destination.
+  **specific historical date** (the day a tail number left a given airport), capture
+  the evidence and the KML flight path, or set an alert for when the aircraft
+  approaches a destination.
 
 In every case the deliverable is the same: confirmed findings, with screenshots and a
 report you can keep.
